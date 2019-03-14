@@ -79,23 +79,29 @@ def import_Excel_SUT_2014(year):
     Export_col_noneu_excel = "CC"
     Export_col_eu = col2num(Export_col_eu_excel)
     Export_col_noneu = col2num(Export_col_noneu_excel)
-
+    
+    df_rates = pd.read_excel('India Supply Use Table SUT_12-13_dated_280916_working_copy.xlsx', sheet_name='Rates')
+    rate_vec = df_rates["Rate"].values
+    rate_vec = rate_vec.reshape((supply_mat.shape[0], 1))
     df = pd.read_excel('India Supply Use Table SUT_12-13_dated_280916_working_copy.xlsx', sheet_name='supply 2012-13')
     #df1 = df.iloc[supply_start_row-2:supply_end_row-1,supply_start_col-1:supply_end_col-1]
     #df2 = df1.fillna(0)
     #
 
-    df1 = df.iloc[:supply_end_row-1,:supply_end_col]
+    df1 = df.iloc[:(supply_end_row-1),:supply_end_col]    
     df1.columns = df1.iloc[supply_row_sector_id-2,:]
+    
     df1.index = df1.iloc[:,supply_col_product_id-1]
-    df2 = df1.iloc[supply_start_row-2:,supply_start_col-1:]
+    df2 = df1.iloc[supply_start_row-2:,supply_start_col-2:-1]
     supply_plusdf = df2.fillna(0)
+    supply_mat = supply_plusdf.values
+    output_tax_vec = supply_mat * rate_vec
     supply_plus_transdf = supply_plusdf.transpose()
 
     sector_headers = df1.iloc[supply_row_sector_id-2,:]
-    product_headers = df1.iloc[:,supply_col_product_id-1]
-    sector_headers = sector_headers[2:].values
-    product_headers = product_headers[4:].values
+    product_headers = df1.iloc[:,supply_col_product_id-2]
+    sector_headers = sector_headers[1:-1].values
+    product_headers = product_headers[2:].values
 
     df1 = df.iloc[supply_start_row-2:supply_end_row-1, Import_col-1]
     df2 = df1.fillna(0)
