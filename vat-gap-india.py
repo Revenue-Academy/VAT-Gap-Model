@@ -190,7 +190,6 @@ blow_up_factor = GDP_LCU[current_year]/GDP_LCU[supply_use_table_year]
 rate_vec = df_rates['rates'].values
 
 # reshape all vectors to column arrays
-
 (import_vec, trade_margin_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
  fin_cons_gov_vec, gfcf_vec, rate_vec) = re_shape(import_vec, trade_margin_vec,
                                                   tax_subsidies_vec, 
@@ -199,7 +198,7 @@ rate_vec = df_rates['rates'].values
                                                   rate_vec)
 
  
-# Blow up the Supply Use Table to current year
+# Blow up the Supply Use Table and Vectors to current year
 (supply_mat, use_mat, imports_vec,
  trade_margins_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
  fin_cons_gov_vec, gfcf_vec) = blow_up_mat(supply_mat, use_mat,
@@ -209,4 +208,6 @@ rate_vec = df_rates['rates'].values
                                        fin_cons_gov_vec, gfcf_vec,
                                        blow_up_factor)
 
-
+"""
+call program to estimate output tax and ITC
+"""
