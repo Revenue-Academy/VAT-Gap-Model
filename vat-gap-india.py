@@ -12,7 +12,7 @@ def col2num(col):
 
 
 def re_shape(import_vec, trade_margin_vec,tax_subsidies_vec, export_vec,
-             fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, rate_vec):
+             fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, rate_vec, exempt_vec):
              
     import_vec = import_vec.reshape(import_vec.shape[0], 1)
     trade_margin_vec = trade_margin_vec.reshape(trade_margin_vec.shape[0], 1)
@@ -22,11 +22,13 @@ def re_shape(import_vec, trade_margin_vec,tax_subsidies_vec, export_vec,
     fin_cons_gov_vec = fin_cons_gov_vec.reshape(fin_cons_gov_vec.shape[0], 1)
     gfcf_vec = gfcf_vec.reshape(gfcf_vec.shape[0], 1)
     rate_vec = rate_vec.reshape(rate_vec.shape[0], 1)
+    exempt_vec = exempt_vec.reshape(exempt_vec.shape[0], 1)
     
     return (import_vec, trade_margin_vec, tax_subsidies_vec, export_vec,
-             fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, rate_vec)
+             fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, rate_vec, exempt_vec)
 
-def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates):
+def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates
+                     , sheet_name_exempt):
 
     # First prepare the Excel file by Selecting the entire sheet and unmerging any merged cells
     
@@ -122,13 +124,23 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates)
     df_rates.fillna(0, inplace=True)
     df_rates = df_rates[['product_id', 'rates']]
     # merge with product id to ensure that the rates are correctly matched
-    
     df_rates = pd.merge(df_product, df_rates,
+                            how="inner", on="product_id")
+    
+    '''
+    Exempt Supply vector
+    '''
+    df_exempt = pd.read_excel(filename, sheet_name_exempt, index_col=False,
+                           header=0)
+    df_exempt.fillna(0, inplace=True)
+    df_exempt = df_exempt[['product_id', 'exempt']]
+    # merge with product id to ensure that the rates are correctly matched
+    df_exempt = pd.merge(df_product, df_exempt,
                             how="inner", on="product_id")
     
     return (supply_mat, use_mat, product_header, industry_header,
             import_vec, trade_margin_vec, tax_subsidies_vec, export_vec,
-            fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, df_rates)
+            fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, df_rates, df_exempt)
 
 def blow_up_mat(supply_mat, use_mat, import_vec, trade_margin_vec,
                 tax_subsidies_vec, export_vec, fin_cons_hh_vec,
@@ -152,19 +164,40 @@ def calc_output_tax(supply_mat, rate_vec):
     """
     enter the matrix operation
     """
+    output_tax_mat = supply_mat * rate_vec
     return output_tax_mat
 
+def calc_itc_disallowed_ratio(supply_mat, exempt_vec):
+    exempt_supply_mat = supply_mat * exempt_vec
+    exempt_supply_ind_vec = calc_sum_by_industry(exempt_supply_mat)
+    supply_ind_vec = calc_sum_by_industry(supply_mat)
+    itc_disallowed_ratio = exempt_supply_ind_vec/supply_ind_vec
+    return itc_disallowed_ratio
+    
+def calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio):
+    itc_disallowed_vec = input_tax_credit_vec * itc_disallowed_ratio
+    return itc_disallowed_vec
+    
+       
+    
+        
 def calc_input_tax_credit(use_mat, rate_vec):
     """
     enter the matrix operation
-    """    
+    """ 
+    input_tax_credit_mat = use_mat * rate_vec
     return input_tax_credit_mat
 
-    
+def calc_sum_by_industry(input_mat):
+    output_vec = input_mat.sum(axis=0)
+    output_vec = output_vec.reshape(1, output_vec.shape[0])
+    return output_vec
+
 filename = 'India Supply Use Table SUT_12-13.xlsx'
 sheet_name_sup = 'supply 2012-13'
 sheet_name_use = 'use 2012-13'
 sheet_name_rates = 'rates'
+sheet_name_exempt = 'exempt'
 supply_use_table_year = 2012
 current_year = 2017
 
@@ -183,19 +216,20 @@ blow_up_factor = GDP_LCU[current_year]/GDP_LCU[supply_use_table_year]
 
 (supply_mat, use_mat, sector_headers, product_headers, import_vec,
  trade_margin_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
- fin_cons_gov_vec, gfcf_vec, df_rates) = import_Excel_SUT(filename,
+ fin_cons_gov_vec, gfcf_vec, df_rates, df_exempt) = import_Excel_SUT(filename,
                                                           sheet_name_sup,
                                                           sheet_name_use,
-                                                          sheet_name_rates)
+                                                          sheet_name_rates, 
+                                                          sheet_name_exempt)
 rate_vec = df_rates['rates'].values
-
+exempt_vec = df_exempt['exempt'].values
 # reshape all vectors to column arrays
 (import_vec, trade_margin_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
- fin_cons_gov_vec, gfcf_vec, rate_vec) = re_shape(import_vec, trade_margin_vec,
+ fin_cons_gov_vec, gfcf_vec, rate_vec, exempt_vec) = re_shape(import_vec, trade_margin_vec,
                                                   tax_subsidies_vec, 
                                                   export_vec, fin_cons_hh_vec,
                                                   fin_cons_gov_vec, gfcf_vec,
-                                                  rate_vec)
+                                                  rate_vec, exempt_vec)
 
  
 # Blow up the Supply Use Table and Vectors to current year
@@ -207,7 +241,11 @@ rate_vec = df_rates['rates'].values
                                        export_vec, fin_cons_hh_vec,
                                        fin_cons_gov_vec, gfcf_vec,
                                        blow_up_factor)
-
-"""
-call program to estimate output tax and ITC
-"""
+##call the functions to calculate output tax and Input tax credit
+output_tax_mat = calc_output_tax(supply_mat, rate_vec)
+input_tax_credit_mat = calc_input_tax_credit(use_mat, rate_vec)
+output_tax_vec = calc_sum_by_industry(output_tax_mat)
+input_tax_credit_vec = calc_sum_by_industry(input_tax_credit_mat)
+itc_disallowed_ratio = calc_itc_disallowed_ratio(supply_mat, exempt_vec)
+itc_disallowed_vec = calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio)
+net_itc_available_vec = input_tax_credit_vec - itc_disallowed_vec
