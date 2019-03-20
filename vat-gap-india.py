@@ -161,9 +161,6 @@ def blow_up_mat(supply_mat, use_mat, import_vec, trade_margin_vec,
             fin_cons_gov_vec, gfcf_vec)
 
 def calc_output_tax(supply_mat, rate_vec):
-    """
-    enter the matrix operation
-    """
     output_tax_mat = supply_mat * rate_vec
     return output_tax_mat
 
@@ -178,13 +175,7 @@ def calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio):
     itc_disallowed_vec = input_tax_credit_vec * itc_disallowed_ratio
     return itc_disallowed_vec
     
-       
-    
-        
 def calc_input_tax_credit(use_mat, rate_vec):
-    """
-    enter the matrix operation
-    """ 
     input_tax_credit_mat = use_mat * rate_vec
     return input_tax_credit_mat
 
@@ -246,6 +237,9 @@ output_tax_mat = calc_output_tax(supply_mat, rate_vec)
 input_tax_credit_mat = calc_input_tax_credit(use_mat, rate_vec)
 output_tax_vec = calc_sum_by_industry(output_tax_mat)
 input_tax_credit_vec = calc_sum_by_industry(input_tax_credit_mat)
+
+# calculate ITC disallowed which is based on the ratio of exempt sales to total sales
 itc_disallowed_ratio = calc_itc_disallowed_ratio(supply_mat, exempt_vec)
 itc_disallowed_vec = calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio)
 net_itc_available_vec = input_tax_credit_vec - itc_disallowed_vec
+
