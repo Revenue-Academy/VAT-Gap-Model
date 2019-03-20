@@ -174,7 +174,7 @@ def calc_itc_disallowed_ratio(supply_mat, exempt_vec):
 def calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio):
     itc_disallowed_vec = input_tax_credit_vec * itc_disallowed_ratio
     return itc_disallowed_vec
-    
+
 def calc_input_tax_credit(use_mat, rate_vec):
     input_tax_credit_mat = use_mat * rate_vec
     return input_tax_credit_mat
@@ -183,6 +183,34 @@ def calc_sum_by_industry(input_mat):
     output_vec = input_mat.sum(axis=0)
     output_vec = output_vec.reshape(1, output_vec.shape[0])
     return output_vec
+
+# Function to calculate the ratio for allocating imports of a product to each industry
+def calc_import_allocation_ratio(use_mat):
+    iiuse_vec = use_mat.sum(axis=1)
+    iiuse_vec = iiuse_vec.reshape(iiuse_vec.shape[0],1)
+    # dividing use_mat by iiuse_vec while avoiding zero by zero
+    import_allocation_mat = np.divide(use_mat, iiuse_vec,
+                                        out=np.zeros_like(use_mat), where=iiuse_vec!=0)
+    return import_allocation_mat
+
+# Function to allocate imports of a product to each industry proportionately 
+def calc_import_allocation(import_allocation_mat, import_vec):
+    import_mat = import_allocation_mat * import_vec
+    return import_mat
+
+# Function to calculate the ratio for allocating exports of a product to each industry
+def calc_export_allocation_ratio(supply_mat):
+    supply_BP_vec = supply_mat.sum(axis=1)
+    supply_BP_vec = supply_BP_vec.reshape(supply_BP_vec.shape[0],1)
+    # dividing supply_mat by supply_BP_vec while avoiding zero by zero
+    export_allocation_mat = np.divide(supply_mat, supply_BP_vec,
+                                        out=np.zeros_like(supply_mat), where=supply_BP_vec!=0)
+    return export_allocation_mat
+
+# Function to allocate exports of a product to each industry proportionately 
+def calc_export_allocation(export_allocation_mat, export_vec):
+    export_mat = export_allocation_mat * export_vec
+    return export_mat
 
 filename = 'India Supply Use Table SUT_12-13.xlsx'
 sheet_name_sup = 'supply 2012-13'
@@ -224,7 +252,7 @@ exempt_vec = df_exempt['exempt'].values
 
  
 # Blow up the Supply Use Table and Vectors to current year
-(supply_mat, use_mat, imports_vec,
+(supply_mat, use_mat, import_vec,
  trade_margins_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
  fin_cons_gov_vec, gfcf_vec) = blow_up_mat(supply_mat, use_mat,
                                        import_vec, trade_margin_vec,
@@ -232,7 +260,7 @@ exempt_vec = df_exempt['exempt'].values
                                        export_vec, fin_cons_hh_vec,
                                        fin_cons_gov_vec, gfcf_vec,
                                        blow_up_factor)
-##call the functions to calculate output tax and Input tax credit
+# call the functions to calculate output tax and Input tax credit
 output_tax_mat = calc_output_tax(supply_mat, rate_vec)
 input_tax_credit_mat = calc_input_tax_credit(use_mat, rate_vec)
 output_tax_vec = calc_sum_by_industry(output_tax_mat)
@@ -242,4 +270,12 @@ input_tax_credit_vec = calc_sum_by_industry(input_tax_credit_mat)
 itc_disallowed_ratio = calc_itc_disallowed_ratio(supply_mat, exempt_vec)
 itc_disallowed_vec = calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio)
 net_itc_available_vec = input_tax_credit_vec - itc_disallowed_vec
+
+# Call function to calculate ratio of import_allocation and import matrix
+import_allocation_mat = calc_import_allocation_ratio(use_mat)
+import_mat = calc_import_allocation(import_allocation_mat, import_vec)
+
+# Call function to calculate ratio of export_allocation and export matrix
+export_allocation_mat = calc_export_allocation_ratio(supply_mat)
+export_mat = calc_export_allocation(export_allocation_mat, export_vec)
 
