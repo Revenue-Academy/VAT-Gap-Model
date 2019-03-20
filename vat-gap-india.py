@@ -194,6 +194,7 @@ def calc_sum_by_industry(input_mat):
 def calc_import_allocation_ratio(use_mat):
     iiuse_vec = use_mat.sum(axis=1)
     iiuse_vec = iiuse_vec.reshape(iiuse_vec.shape[0],1)
+    # dividing use_mat by iiuse_vec while avoiding zero by zero
     import_allocation_mat = np.divide(use_mat, iiuse_vec,
                                         out=np.zeros_like(use_mat), where=iiuse_vec!=0)
     return import_allocation_mat
@@ -207,8 +208,8 @@ def calc_import_allocation(import_allocation_mat, import_vec):
 def calc_export_allocation_ratio(supply_mat):
     supply_BP_vec = supply_mat.sum(axis=1)
     supply_BP_vec = supply_BP_vec.reshape(supply_BP_vec.shape[0],1)
-    # dividing use_mat by supply_BP_vec while avoiding zero by zero
-    export_allocation_mat = np.divide(use_mat, supply_BP_vec,
+    # dividing supply_mat by supply_BP_vec while avoiding zero by zero
+    export_allocation_mat = np.divide(supply_mat, supply_BP_vec,
                                         out=np.zeros_like(supply_mat), where=supply_BP_vec!=0)
     return export_allocation_mat
 
