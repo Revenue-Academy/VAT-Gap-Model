@@ -184,13 +184,17 @@ def calc_sum_by_industry(input_mat):
     output_vec = output_vec.reshape(1, output_vec.shape[0])
     return output_vec
 
+def calc_sum_by_commodity(input_mat):
+    output_vec = input_mat.sum(axis=1)
+    output_vec = output_vec.reshape(output_vec.shape[0], 1)
+    return output_vec
+
 # Function to calculate the ratio for allocating imports of a product to each industry
 def calc_import_allocation_ratio(use_mat):
-    iiuse_vec = use_mat.sum(axis=1)
-    iiuse_vec = iiuse_vec.reshape(iiuse_vec.shape[0],1)
-    # dividing use_mat by iiuse_vec while avoiding zero by zero
-    import_allocation_mat = np.divide(use_mat, iiuse_vec,
-                                        out=np.zeros_like(use_mat), where=iiuse_vec!=0)
+    iiuse_comm_vec = calc_sum_by_commodity(use_mat)
+     # dividing use_mat by iiuse_vec while avoiding zero by zero
+    import_allocation_mat = np.divide(use_mat, iiuse_comm_vec,
+                                        out=np.zeros_like(use_mat), where=iiuse_comm_vec!=0)
     return import_allocation_mat
 
 # Function to allocate imports of a product to each industry proportionately 
@@ -200,11 +204,10 @@ def calc_import_allocation(import_allocation_mat, import_vec):
 
 # Function to calculate the ratio for allocating exports of a product to each industry
 def calc_export_allocation_ratio(supply_mat):
-    supply_BP_vec = supply_mat.sum(axis=1)
-    supply_BP_vec = supply_BP_vec.reshape(supply_BP_vec.shape[0],1)
+    supply_comm_vec = calc_sum_by_commodity(supply_mat)
     # dividing supply_mat by supply_BP_vec while avoiding zero by zero
-    export_allocation_mat = np.divide(supply_mat, supply_BP_vec,
-                                        out=np.zeros_like(supply_mat), where=supply_BP_vec!=0)
+    export_allocation_mat = np.divide(supply_mat, supply_comm_vec,
+                                        out=np.zeros_like(supply_mat), where=supply_comm_vec!=0)
     return export_allocation_mat
 
 # Function to allocate exports of a product to each industry proportionately 
