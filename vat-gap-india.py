@@ -211,6 +211,11 @@ def calc_export_allocation_ratio(supply_mat):
 def calc_export_allocation(export_allocation_mat, export_vec):
     export_mat = export_allocation_mat * export_vec
     return export_mat
+# Function to calculate GST on imports
+def calc_GST_on_imports(import_vec, rate_vec):
+    GST_on_imports_vec = import_vec * rate_vec
+    tot_GST_on_imports = GST_on_imports_vec.sum()
+    return (GST_on_imports_vec, tot_GST_on_imports)
 
 filename = 'India Supply Use Table SUT_12-13.xlsx'
 sheet_name_sup = 'supply 2012-13'
@@ -275,7 +280,16 @@ net_itc_available_vec = input_tax_credit_vec - itc_disallowed_vec
 import_allocation_mat = calc_import_allocation_ratio(use_mat)
 import_mat = calc_import_allocation(import_allocation_mat, import_vec)
 
+# Allocating tax and subsidies across Industry
+tax_subsidy_mat = calc_import_allocation(import_allocation_mat, tax_subsidies_vec)
+
+# Removing Tax and subsidy from Use matrix to reduce tax base
+use_mat_less_tax = use_mat - tax_subsidy_mat
+ 
 # Call function to calculate ratio of export_allocation and export matrix
 export_allocation_mat = calc_export_allocation_ratio(supply_mat)
 export_mat = calc_export_allocation(export_allocation_mat, export_vec)
+# reducing the exports from supply
+supply_less_exports_mat = supply_mat - export_mat 
+(GST_on_imports_vec, tot_GST_on_imports) = calc_GST_on_imports(import_vec, rate_vec)
 
