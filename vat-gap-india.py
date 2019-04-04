@@ -13,17 +13,17 @@ def col2num(col):
 
 def re_shape(import_vec, trade_margin_vec,tax_subsidies_vec, export_vec,
              fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, rate_vec, exempt_vec):
-             
+
     import_vec = import_vec.reshape(import_vec.shape[0], 1)
     trade_margin_vec = trade_margin_vec.reshape(trade_margin_vec.shape[0], 1)
     tax_subsidies_vec = tax_subsidies_vec.reshape(tax_subsidies_vec.shape[0], 1)
-    export_vec = export_vec.reshape(export_vec.shape[0], 1)    
+    export_vec = export_vec.reshape(export_vec.shape[0], 1)
     fin_cons_hh_vec = fin_cons_hh_vec.reshape(fin_cons_hh_vec.shape[0], 1)
     fin_cons_gov_vec = fin_cons_gov_vec.reshape(fin_cons_gov_vec.shape[0], 1)
     gfcf_vec = gfcf_vec.reshape(gfcf_vec.shape[0], 1)
     rate_vec = rate_vec.reshape(rate_vec.shape[0], 1)
     exempt_vec = exempt_vec.reshape(exempt_vec.shape[0], 1)
-    
+
     return (import_vec, trade_margin_vec, tax_subsidies_vec, export_vec,
              fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, rate_vec, exempt_vec)
 
@@ -31,15 +31,15 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates
                      , sheet_name_exempt):
 
     # First prepare the Excel file by Selecting the entire sheet and unmerging any merged cells
-    
+
     '''
     SUPPLY table
     '''
-    
+
     df_supply = pd.read_excel(filename, sheet_name_sup, index_col=False,
                               header=None)
     df_supply.fillna(0, inplace=True)
-    
+
     supply_mat_start_col_excel="C"
     supply_mat_end_col_excel = "BP"
     supply_mat_start_col = col2num(supply_mat_start_col_excel)
@@ -49,7 +49,7 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates
     supply_mat = df_supply.iloc[supply_mat_start_row-1:supply_mat_end_row,
                                 supply_mat_start_col-1:supply_mat_end_col]
     supply_mat = supply_mat.values
-    
+
     supply_col_product_id_excel = "B"
     supply_col_product_id = col2num(supply_col_product_id_excel)
     supply_row_industry_id = 2
@@ -71,20 +71,20 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates
 
     product_header = df_supply.iloc[supply_mat_start_row-1:supply_mat_end_row, supply_col_product_id-1]
     industry_header = df_supply.iloc[supply_row_industry_id-1, supply_mat_start_col-1:supply_mat_end_col]
-    
-    
+
+
     # Product Header Dataframe to ensure rates are correctly matched
     df_product = pd.DataFrame(data = product_header.values, columns = np.array(['product_id']))
 
     '''
     USE table
     '''
-    
+
     df_use = pd.read_excel(filename, sheet_name_use, index_col=False,
                            header=None)
     df_use.fillna(0, inplace=True)
 
-    
+
     use_mat_start_col_excel="C"
     use_mat_end_col_excel="BP"
     use_mat_start_col=col2num(use_mat_start_col_excel)
@@ -126,7 +126,7 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates
     # merge with product id to ensure that the rates are correctly matched
     df_rates = pd.merge(df_product, df_rates,
                             how="inner", on="product_id")
-    
+
     '''
     Exempt Supply vector
     '''
@@ -137,7 +137,7 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates
     # merge with product id to ensure that the rates are correctly matched
     df_exempt = pd.merge(df_product, df_exempt,
                             how="inner", on="product_id")
-    
+
     return (supply_mat, use_mat, product_header, industry_header,
             import_vec, trade_margin_vec, tax_subsidies_vec, export_vec,
             fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, df_rates, df_exempt)
@@ -145,7 +145,7 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates
 def blow_up_mat(supply_mat, use_mat, import_vec, trade_margin_vec,
                 tax_subsidies_vec, export_vec, fin_cons_hh_vec,
                 fin_cons_gov_vec, gfcf_vec, blow_up_factor):
-    
+
     supply_mat *= blow_up_factor
     use_mat *= blow_up_factor
     import_vec *= blow_up_factor
@@ -170,7 +170,7 @@ def calc_itc_disallowed_ratio(supply_mat, exempt_vec):
     supply_ind_vec = calc_sum_by_industry(supply_mat)
     itc_disallowed_ratio = exempt_supply_ind_vec/supply_ind_vec
     return itc_disallowed_ratio
-    
+
 def calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio):
     itc_disallowed_vec = input_tax_credit_vec * itc_disallowed_ratio
     return itc_disallowed_vec
@@ -189,31 +189,20 @@ def calc_sum_by_commodity(input_mat):
     output_vec = output_vec.reshape(output_vec.shape[0], 1)
     return output_vec
 
-# Function to calculate the ratio for allocating imports of a product to each industry
-def calc_import_allocation_ratio(use_mat):
-    iiuse_comm_vec = calc_sum_by_commodity(use_mat)
-     # dividing use_mat by iiuse_vec while avoiding zero by zero
-    import_allocation_mat = np.divide(use_mat, iiuse_comm_vec,
-                                        out=np.zeros_like(use_mat), where=iiuse_comm_vec!=0)
-    return import_allocation_mat
+# Function to calculate the ratio for allocating imports/exports/taxes/subsidies of a product to each industry
+def calc_allocation_ratio(input_mat):
+    sum_by_prod_vec = input_mat.sum(axis=1)
+    sum_by_prod_vec = sum_by_prod_vec.reshape(sum_by_prod_vec.shape[0],1)
+    # dividing use_mat by iiuse_vec while avoiding zero by zero
+    output_mat = np.divide(use_mat, sum_by_prod_vec,
+                           out=np.zeros_like(input_mat), where=sum_by_prod_vec!=0)
+    return output_mat
 
-# Function to allocate imports of a product to each industry proportionately 
-def calc_import_allocation(import_allocation_mat, import_vec):
-    import_mat = import_allocation_mat * import_vec
-    return import_mat
+# Function to allocate imports/exports/taxes/subsidies of a product to each industry proportionately
+def calc_allocation_to_industry(allocation_mat, input_vec):
+    output_mat = allocation_mat * input_vec
+    return output_mat
 
-# Function to calculate the ratio for allocating exports of a product to each industry
-def calc_export_allocation_ratio(supply_mat):
-    supply_comm_vec = calc_sum_by_commodity(supply_mat)
-    # dividing supply_mat by supply_BP_vec while avoiding zero by zero
-    export_allocation_mat = np.divide(supply_mat, supply_comm_vec,
-                                        out=np.zeros_like(supply_mat), where=supply_comm_vec!=0)
-    return export_allocation_mat
-
-# Function to allocate exports of a product to each industry proportionately 
-def calc_export_allocation(export_allocation_mat, export_vec):
-    export_mat = export_allocation_mat * export_vec
-    return export_mat
 # Function to calculate GST on imports
 def calc_GST_on_imports(import_vec, rate_vec):
     GST_on_imports_vec = import_vec * rate_vec
@@ -239,26 +228,26 @@ GDP_LCU[2017] = 1.67731E+14
 
 blow_up_factor = GDP_LCU[current_year]/GDP_LCU[supply_use_table_year]
 
-# Import the Supply Use Table and GST Rates 
+# Import the Supply Use Table and GST Rates
 
 (supply_mat, use_mat, sector_headers, product_headers, import_vec,
  trade_margin_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
  fin_cons_gov_vec, gfcf_vec, df_rates, df_exempt) = import_Excel_SUT(filename,
                                                           sheet_name_sup,
                                                           sheet_name_use,
-                                                          sheet_name_rates, 
+                                                          sheet_name_rates,
                                                           sheet_name_exempt)
 rate_vec = df_rates['rates'].values
 exempt_vec = df_exempt['exempt'].values
 # reshape all vectors to column arrays
 (import_vec, trade_margin_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
  fin_cons_gov_vec, gfcf_vec, rate_vec, exempt_vec) = re_shape(import_vec, trade_margin_vec,
-                                                  tax_subsidies_vec, 
+                                                  tax_subsidies_vec,
                                                   export_vec, fin_cons_hh_vec,
                                                   fin_cons_gov_vec, gfcf_vec,
                                                   rate_vec, exempt_vec)
 
- 
+
 # Blow up the Supply Use Table and Vectors to current year
 (supply_mat, use_mat, import_vec,
  trade_margins_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
@@ -268,9 +257,36 @@ exempt_vec = df_exempt['exempt'].values
                                        export_vec, fin_cons_hh_vec,
                                        fin_cons_gov_vec, gfcf_vec,
                                        blow_up_factor)
+
+# Call function to find the ratio of allocation to be used for imports and tax & subsidies
+allocation_ratio_by_use_mat = calc_allocation_ratio(use_mat)
+# Call function to allocate imports across industries
+# import_mat is the matrix containing imports by products & industries
+import_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, import_vec)
+# Call function to allocate tax & sunsidies across industries
+# tax_subsidy_mat is the matrix containing taxes & sunsidies by products & industries
+tax_subsidy_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, tax_subsidies_vec)
+# Call function to allocate gross capital formation across industries
+# gfcf_mat is the matrix containing gross capital formation by products & industries
+gfcf_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, gfcf_vec)
+# Removing Tax and subsidies from use matrix to reduce tax base
+use_less_tax_mat = use_mat - tax_subsidy_mat
+# Add gross capital formation to the use_less_tax_mat
+use_for_ITC_mat = use_less_tax_mat + gfcf_mat
+
+# Call function to allocate imports across industries
+# export_mat is the matrix containing exports by products & industries
+allocation_ratio_by_supply_mat = calc_allocation_ratio(supply_mat)
+export_mat = calc_allocation_to_industry(allocation_ratio_by_supply_mat, export_vec)
+# Reducing the exports from supply to get domestic comsumption
+supply_less_exports_mat = supply_mat - export_mat
+
+# Call function to calculate GST on imports
+(GST_on_imports_vec, tot_GST_on_imports) = calc_GST_on_imports(import_vec, rate_vec)
+
 # call the functions to calculate output tax and Input tax credit
-output_tax_mat = calc_output_tax(supply_mat, rate_vec)
-input_tax_credit_mat = calc_input_tax_credit(use_mat, rate_vec)
+output_tax_mat = calc_output_tax(supply_less_exports_mat, rate_vec)
+input_tax_credit_mat = calc_input_tax_credit(use_for_ITC_mat, rate_vec)
 output_tax_vec = calc_sum_by_industry(output_tax_mat)
 input_tax_credit_vec = calc_sum_by_industry(input_tax_credit_mat)
 
@@ -278,21 +294,3 @@ input_tax_credit_vec = calc_sum_by_industry(input_tax_credit_mat)
 itc_disallowed_ratio = calc_itc_disallowed_ratio(supply_mat, exempt_vec)
 itc_disallowed_vec = calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio)
 net_itc_available_vec = input_tax_credit_vec - itc_disallowed_vec
-
-# Call function to calculate ratio of import_allocation and import matrix
-import_allocation_mat = calc_import_allocation_ratio(use_mat)
-import_mat = calc_import_allocation(import_allocation_mat, import_vec)
-
-# Allocating tax and subsidies across Industry
-tax_subsidy_mat = calc_import_allocation(import_allocation_mat, tax_subsidies_vec)
-
-# Removing Tax and subsidy from Use matrix to reduce tax base
-use_mat_less_tax = use_mat - tax_subsidy_mat
- 
-# Call function to calculate ratio of export_allocation and export matrix
-export_allocation_mat = calc_export_allocation_ratio(supply_mat)
-export_mat = calc_export_allocation(export_allocation_mat, export_vec)
-# reducing the exports from supply
-supply_less_exports_mat = supply_mat - export_mat 
-(GST_on_imports_vec, tot_GST_on_imports) = calc_GST_on_imports(import_vec, rate_vec)
-
