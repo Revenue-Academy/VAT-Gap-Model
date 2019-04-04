@@ -275,8 +275,8 @@ tax_subsidy_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, tax_s
 use_mat_less_tax = use_mat - tax_subsidy_mat
 
 # Call function to allocate gross capital formation across industries
-# gcf_mat is the matrix containing gross capital formation by products & industries
-gcf_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, gfcf_vec)
+# gfcf_mat is the matrix containing gross capital formation by products & industries
+gfcf_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, gfcf_vec)
 
 # Call function to allocate imports across industries
 # export_mat is the matrix containing exports by products & industries
