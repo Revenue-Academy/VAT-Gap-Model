@@ -224,7 +224,6 @@ GDP_LCU[2017] = 1.67731E+14
 blow_up_factor = GDP_LCU[current_year]/GDP_LCU[supply_use_table_year]
 
 # Import the Supply Use Table and GST Rates
-
 (supply_mat, use_mat, sector_headers, product_headers, import_vec,
  trade_margin_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
  fin_cons_gov_vec, gfcf_vec, df_rates, df_exempt) = import_Excel_SUT(filename,
@@ -242,7 +241,6 @@ exempt_vec = df_exempt['exempt'].values
                                                   fin_cons_gov_vec, gfcf_vec,
                                                   rate_vec, exempt_vec)
 
-
 # Blow up the Supply Use Table and Vectors to current year
 (supply_mat, use_mat, import_vec,
  trade_margins_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
@@ -252,13 +250,14 @@ exempt_vec = df_exempt['exempt'].values
                                        export_vec, fin_cons_hh_vec,
                                        fin_cons_gov_vec, gfcf_vec,
                                        blow_up_factor)
-# call the functions to calculate output tax and Input tax credit
+
+# Call the functions to calculate output tax and Input tax credit
 output_tax_mat = calc_output_tax(supply_mat, rate_vec)
 input_tax_credit_mat = calc_input_tax_credit(use_mat, rate_vec)
 output_tax_vec = calc_sum_by_industry(output_tax_mat)
 input_tax_credit_vec = calc_sum_by_industry(input_tax_credit_mat)
 
-# calculate ITC disallowed which is based on the ratio of exempt sales to total sales
+# Calculate ITC disallowed which is based on the ratio of exempt sales to total sales
 itc_disallowed_ratio = calc_itc_disallowed_ratio(supply_mat, exempt_vec)
 itc_disallowed_vec = calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio)
 net_itc_available_vec = input_tax_credit_vec - itc_disallowed_vec
@@ -266,7 +265,7 @@ net_itc_available_vec = input_tax_credit_vec - itc_disallowed_vec
 # Call function to find the ratio of allocation to be used for imports and tax & subsidies
 allocation_ratio_by_use_mat = calc_allocation_ratio(use_mat)
 # Call function to allocate imports across industries
-# import_mat is the matrix containing imports by products & industris
+# import_mat is the matrix containing imports by products & industries
 import_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, import_vec)
 
 # Call function to allocate tax & sunsidies across industries
