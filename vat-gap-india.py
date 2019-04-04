@@ -198,6 +198,15 @@ def calc_allocation_ratio(input_mat):
                            out=np.zeros_like(input_mat), where=sum_by_prod_vec!=0)
     return output_mat
 
+def calc_allocation_by_use(use_mat, fin_cons_hh_vec ,fin_cons_gov_vec , gfcf_vec ):
+    use_comm_vec = calc_sum_by_commodity(use_mat)
+    dom_use_vec =  use_comm_vec + fin_cons_hh_vec + fin_cons_gov_vec + gfcf_vec 
+    use_vec_ratio = use_comm_vec / dom_use_vec
+    fin_cons_hh_vec_ratio = fin_cons_hh_vec/ dom_use_vec
+    fin_cons_gov_vec_ratio = fin_cons_gov_vec/ dom_use_vec
+    gfcf_vec_ratio = gfcf_vec/ dom_use_vec
+    return (use_vec_ratio, fin_cons_hh_vec_ratio, fin_cons_gov_vec_ratio, gfcf_vec_ratio)
+
 # Function to allocate imports/exports/taxes/subsidies of a product to each industry proportionately
 def calc_allocation_to_industry(allocation_mat, input_vec):
     output_mat = allocation_mat * input_vec
@@ -265,10 +274,14 @@ allocation_ratio_by_use_mat = calc_allocation_ratio(use_mat)
 import_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, import_vec)
 # Call function to allocate tax & sunsidies across industries
 # tax_subsidy_mat is the matrix containing taxes & sunsidies by products & industries
-tax_subsidy_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, tax_subsidies_vec)
+(use_vec_ratio, fin_cons_hh_vec_ratio, fin_cons_gov_vec_ratio, gfcf_vec_ratio)= calc_allocation_by_use(use_mat, fin_cons_hh_vec ,fin_cons_gov_vec , gfcf_vec)
+tax_subsidies_vec_iiuse = tax_subsidies_vec * (use_vec_ratio)   
+tax_subsidy_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, tax_subsidies_vec_iiuse)
 # Call function to allocate gross capital formation across industries
 # gfcf_mat is the matrix containing gross capital formation by products & industries
-gfcf_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, gfcf_vec)
+tax_subsidies_vec_gfcf = tax_subsidies_vec * (gfcf_vec_ratio) 
+gfcf_less_tax_vec = gfcf_vec - tax_subsidies_vec_gfcf  
+gfcf_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, gfcf_less_tax_vec)
 # Removing Tax and subsidies from use matrix to reduce tax base
 use_less_tax_mat = use_mat - tax_subsidy_mat
 # Add gross capital formation to the use_less_tax_mat
@@ -291,6 +304,12 @@ output_tax_vec = calc_sum_by_industry(output_tax_mat)
 input_tax_credit_vec = calc_sum_by_industry(input_tax_credit_mat)
 
 # calculate ITC disallowed which is based on the ratio of exempt sales to total sales
-itc_disallowed_ratio = calc_itc_disallowed_ratio(supply_mat, exempt_vec)
+itc_disallowed_ratio = calc_itc_disallowed_ratio(supply_less_exports_mat, exempt_vec)
 itc_disallowed_vec = calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio)
 net_itc_available_vec = input_tax_credit_vec - itc_disallowed_vec
+gst_potential_ind_less_import = output_tax_vec - net_itc_available_vec 
+gst_potential_less_import_total = gst_potential_ind_less_import.sum()
+gst_potential_total = gst_potential_less_import_total + tot_GST_on_imports 
+print(f'gst_potential_less_import_total: {gst_potential_less_import_total}')
+print(f'gst_potential_total: {gst_potential_total}')
+
