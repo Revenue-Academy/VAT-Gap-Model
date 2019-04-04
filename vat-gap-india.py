@@ -270,20 +270,20 @@ allocation_ratio_by_use_mat = calc_allocation_ratio(use_mat)
 import_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, import_vec)
 
 # Call function to allocate tax & sunsidies across industries
-# tax_subsidy_mat is the matrix containing imports by products & industris
+# tax_subsidy_mat is the matrix containing taxes & sunsidies by products & industries
 tax_subsidy_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, tax_subsidies_vec)
 # Removing Tax and subsidies from use matrix to reduce tax base
 use_mat_less_tax = use_mat - tax_subsidy_mat
 
 # Call function to allocate gross capital formation across industries
-# gcf_mat is the matrix containing gross capital formation by products & industris
+# gcf_mat is the matrix containing gross capital formation by products & industries
 gcf_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, gfcf_vec)
 
 # Call function to allocate imports across industries
-# export_mat is the matrix containing imports by products & industris
+# export_mat is the matrix containing exports by products & industries
 allocation_ratio_by_supply_mat = calc_allocation_ratio(supply_mat)
 export_mat = calc_allocation_to_industry(allocation_ratio_by_supply_mat, export_vec)
-# reducing the exports from supply
+# Reducing the exports from supply to get domestic comsumption
 supply_less_exports_mat = supply_mat - export_mat
 
 # Call function to calculate GST on imports
