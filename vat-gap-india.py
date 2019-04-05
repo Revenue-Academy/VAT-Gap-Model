@@ -1,6 +1,9 @@
 import string
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+
 np.seterr(divide='ignore', invalid='ignore')
 
 def col2num(col):
@@ -28,7 +31,7 @@ def re_shape(import_vec, trade_margin_vec,tax_subsidies_vec, export_vec,
              fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, rate_vec, exempt_vec)
 
 def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates
-                     , sheet_name_exempt):
+                     , sheet_name_exempt, sheet_name_reg_ratio):
 
     # First prepare the Excel file by Selecting the entire sheet and unmerging any merged cells
 
@@ -70,11 +73,12 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates
     tax_subsidies_vec = tax_subsidies_vec.values
 
     product_header = df_supply.iloc[supply_mat_start_row-1:supply_mat_end_row, supply_col_product_id-1]
+    product_header = product_header.values
     industry_header = df_supply.iloc[supply_row_industry_id-1, supply_mat_start_col-1:supply_mat_end_col]
-
+    industry_header = industry_header.values
 
     # Product Header Dataframe to ensure rates are correctly matched
-    df_product = pd.DataFrame(data = product_header.values, columns = np.array(['product_id']))
+    df_product = pd.DataFrame(data = product_header, columns = np.array(['product_id']))
 
     '''
     USE table
@@ -137,10 +141,17 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates
     # merge with product id to ensure that the rates are correctly matched
     df_exempt = pd.merge(df_product, df_exempt,
                             how="inner", on="product_id")
-
-    return (supply_mat, use_mat, product_header, industry_header,
-            import_vec, trade_margin_vec, tax_subsidies_vec, export_vec,
-            fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, df_rates, df_exempt)
+    '''
+    GST Registered Ratio by Industry
+    '''
+    df_gst_reg_ratio = pd.read_excel(filename, sheet_name_reg_ratio, index_col=False)
+    industry_group_header = df_gst_reg_ratio['industry_group'].values
+    gst_reg_ratio_ind_vec = df_gst_reg_ratio['gst_reg_ratio'].values
+    
+    return (supply_mat, use_mat, industry_header, product_header,
+            industry_group_header, import_vec, trade_margin_vec,
+            tax_subsidies_vec, export_vec, fin_cons_hh_vec, fin_cons_gov_vec,
+            gfcf_vec, gst_reg_ratio_ind_vec, df_rates, df_exempt)
 
 def blow_up_mat(supply_mat, use_mat, import_vec, trade_margin_vec,
                 tax_subsidies_vec, export_vec, fin_cons_hh_vec,
@@ -223,6 +234,7 @@ sheet_name_sup = 'supply 2012-13'
 sheet_name_use = 'use 2012-13'
 sheet_name_rates = 'rates'
 sheet_name_exempt = 'exempt'
+sheet_name_reg_ratio = 'gst_reg_ratio'
 supply_use_table_year = 2012
 current_year = 2017
 
@@ -239,13 +251,12 @@ blow_up_factor = GDP_LCU[current_year]/GDP_LCU[supply_use_table_year]
 
 # Import the Supply Use Table and GST Rates
 
-(supply_mat, use_mat, sector_headers, product_headers, import_vec,
- trade_margin_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
- fin_cons_gov_vec, gfcf_vec, df_rates, df_exempt) = import_Excel_SUT(filename,
-                                                          sheet_name_sup,
-                                                          sheet_name_use,
-                                                          sheet_name_rates,
-                                                          sheet_name_exempt)
+(supply_mat, use_mat, industry_header, product_header, industry_group_header,
+ import_vec, trade_margin_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
+ fin_cons_gov_vec, gfcf_vec, gst_reg_ratio_ind_vec, df_rates,
+ df_exempt) = import_Excel_SUT(filename, sheet_name_sup, sheet_name_use,
+                               sheet_name_rates, sheet_name_exempt,
+                               sheet_name_reg_ratio)
 rate_vec = df_rates['rates'].values
 exempt_vec = df_exempt['exempt'].values
 # reshape all vectors to column arrays
@@ -312,4 +323,39 @@ gst_potential_less_import_total = gst_potential_ind_less_import.sum()
 gst_potential_total = gst_potential_less_import_total + tot_GST_on_imports 
 print(f'gst_potential_less_import_total: {gst_potential_less_import_total}')
 print(f'gst_potential_total: {gst_potential_total}')
+gst_pot_crores = gst_potential_ind_less_import/100
 
+industry_group_df = pd.DataFrame(data=industry_group_header, index=industry_header, columns=np.array(['industry_group']))
+industry_group_df = industry_group_df.reset_index()
+industry_group_df = industry_group_df.rename(columns={'index':'industry_id'})
+industry_group_df.to_csv('industry.csv')
+
+
+gst_pot_crores = gst_pot_crores.reshape(gst_pot_crores.shape[1], 1)
+gst_coll_industry_df = pd.DataFrame(data=gst_pot_crores, index=industry_header, columns=np.array(['GST potential']))
+gst_coll_industry_df = gst_coll_industry_df.reset_index()
+gst_coll_industry_df = gst_coll_industry_df.rename(columns={'index':'industry_id'})
+gst_coll_industry_df.to_csv('gst_coll.csv')
+gst_coll_industry_group_df = pd.merge(gst_coll_industry_df, industry_group_df,
+                            how="inner", on="industry_id")
+gst_coll_industry_group_df = gst_coll_industry_group_df[['industry_group', 'GST potential']]
+gst_coll_group_df = gst_coll_industry_group_df.groupby(['industry_group']).sum()
+gst_coll_group_df = gst_coll_group_df.reset_index()
+
+industry_group = gst_coll_group_df['industry_group'].values
+gst_industry_group = gst_coll_group_df['GST potential'].values
+
+plt.rcdefaults()
+fig, ax = plt.subplots(figsize=(8, 8))
+# Example data
+x_pos = np.arange(len(industry_group))
+ax.bar(x_pos, gst_industry_group, 
+        color='green')
+ax.set_xticks(x_pos)
+ax.set_xticklabels(industry_group, rotation=90)
+
+ax.set_ylabel('Rupees crores')
+ax.set_xlabel('Industry')
+ax.set_title('GST Potential for India by Industry - 2017')
+plt.savefig('GST Potential.png', bbox_inches = "tight")
+plt.show()
