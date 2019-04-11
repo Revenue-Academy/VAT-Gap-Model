@@ -177,6 +177,7 @@ def calc_output_tax(supply_mat, rate_vec):
 
 def calc_itc_disallowed_ratio(supply_mat, exempt_vec):
     exempt_supply_mat = supply_mat * exempt_vec
+    exempt_ind_df = make_ind_df(exempt_supply_mat, industry_header, "exempt_ind.csv")
     exempt_supply_ind_vec = calc_sum_by_industry(exempt_supply_mat)
     supply_ind_vec = calc_sum_by_industry(supply_mat)
     itc_disallowed_ratio = exempt_supply_ind_vec/supply_ind_vec
@@ -228,6 +229,17 @@ def calc_GST_on_imports(import_vec, rate_vec):
     GST_on_imports_vec = import_vec * rate_vec
     tot_GST_on_imports = GST_on_imports_vec.sum()
     return (GST_on_imports_vec, tot_GST_on_imports)
+
+
+def make_ind_df(input_mat, industry_header, file_name):
+    input_vec = calc_sum_by_industry(input_mat)
+    input_vec = input_vec.reshape( input_vec.shape[1], 1)
+    industry_header = industry_header.reshape( industry_header.shape[0], 1)
+    ind_df = pd.DataFrame(data=input_vec, index=industry_header, columns=np.array(['industry']))
+    ind_df = ind_df.reset_index()
+    ind_df = ind_df.rename(columns={'index':'industry_id'})
+    ind_df.to_csv(file_name)
+    return ind_df
 
 filename = 'India Supply Use Table SUT_12-13.xlsx'
 sheet_name_sup = 'supply 2012-13'
@@ -302,9 +314,13 @@ use_for_ITC_mat = use_less_tax_mat + gfcf_mat
 # export_mat is the matrix containing exports by products & industries
 allocation_ratio_by_supply_mat = calc_allocation_ratio(supply_mat)
 export_mat = calc_allocation_to_industry(allocation_ratio_by_supply_mat, export_vec)
+export_ind_df = make_ind_df(export_mat, industry_header, "export_ind.csv")
+supply_ind_df = make_ind_df(supply_mat, industry_header, "supply_ind.csv")
+import_ind_df = make_ind_df(import_mat, industry_header, "import_ind.csv")
+
 # Reducing the exports from supply to get domestic comsumption
 supply_less_exports_mat = supply_mat - export_mat
-
+dom_supply_df = make_ind_df(supply_less_exports_mat, industry_header, "dom_supply.csv")
 # Call function to calculate GST on imports
 (GST_on_imports_vec, tot_GST_on_imports) = calc_GST_on_imports(import_vec, rate_vec)
 
@@ -318,6 +334,16 @@ input_tax_credit_vec = calc_sum_by_industry(input_tax_credit_mat)
 itc_disallowed_ratio = calc_itc_disallowed_ratio(supply_less_exports_mat, exempt_vec)
 itc_disallowed_vec = calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio)
 net_itc_available_vec = input_tax_credit_vec - itc_disallowed_vec
+
+itc_ind_df = make_ind_df(input_tax_credit_mat, industry_header, "itc_ind.csv")
+itc_disallowed_vec1 = itc_disallowed_vec.reshape(itc_disallowed_vec.shape[1], 1)
+industry_header = industry_header.reshape( industry_header.shape[0], 1)
+itc_disall_df = pd.DataFrame(data=itc_disallowed_vec1, index=industry_header, columns=np.array(['industry']))
+itc_disall_df = itc_disall_df.reset_index()
+itc_disall_df = itc_disall_df.rename(columns={'index':'industry_id'})
+itc_disall_df.to_csv("itc_disall.csv")
+
+
 gst_potential_ind_less_import = output_tax_vec - net_itc_available_vec 
 gst_potential_less_import_total = gst_potential_ind_less_import.sum()
 gst_potential_total = gst_potential_less_import_total + tot_GST_on_imports 
@@ -329,6 +355,7 @@ industry_group_df = pd.DataFrame(data=industry_group_header, index=industry_head
 industry_group_df = industry_group_df.reset_index()
 industry_group_df = industry_group_df.rename(columns={'index':'industry_id'})
 industry_group_df.to_csv('industry.csv')
+
 
 
 gst_pot_crores = gst_pot_crores.reshape(gst_pot_crores.shape[1], 1)
