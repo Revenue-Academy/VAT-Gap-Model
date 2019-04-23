@@ -225,10 +225,13 @@ def calc_allocation_to_industry(allocation_mat, input_vec):
     return output_mat
 
 # Function to calculate GST on imports
-def calc_GST_on_imports(import_vec, rate_vec):
-    GST_on_imports_vec = import_vec * rate_vec
-    tot_GST_on_imports = GST_on_imports_vec.sum()
-    return (GST_on_imports_vec, tot_GST_on_imports)
+def calc_GST_on_imports(use_mat, import_vec, rate_vec):
+    allocation_ratio_by_use_mat = calc_allocation_ratio(use_mat)
+    import_mat = calc_allocation_to_industry(allocation_ratio_by_use_mat, import_vec)
+    GST_on_imports_mat = import_mat * rate_vec
+    GST_on_imports_ind_vec = calc_sum_by_industry(GST_on_imports_mat)
+    tot_GST_on_imports =  GST_on_imports_ind_vec.sum()
+    return (GST_on_imports_ind_vec, tot_GST_on_imports)
 
 
 def make_ind_df(input_mat, industry_header, file_name):
@@ -240,6 +243,18 @@ def make_ind_df(input_mat, industry_header, file_name):
     ind_df = ind_df.rename(columns={'index':'industry_id'})
     ind_df.to_csv(file_name)
     return ind_df
+
+def make_vec_df(input_vec, industry_header, file_name):
+    input_vec = input_vec.reshape(input_vec.shape[1], 1)
+    industry_header = industry_header.reshape(industry_header.shape[0], 1)
+    ind_df = pd.DataFrame(data=input_vec, index=industry_header, columns=np.array(['industry']))
+    ind_df = ind_df.reset_index()
+    ind_df = ind_df.rename(columns={'index':'industry_id'})
+    ind_df.to_csv(file_name)
+    
+    
+    
+    
 
 filename = 'India Supply Use Table SUT_12-13.xlsx'
 sheet_name_sup = 'supply 2012-13'
@@ -322,12 +337,14 @@ import_ind_df = make_ind_df(import_mat, industry_header, "import_ind.csv")
 supply_less_exports_mat = supply_mat - export_mat
 dom_supply_df = make_ind_df(supply_less_exports_mat, industry_header, "dom_supply.csv")
 # Call function to calculate GST on imports
-(GST_on_imports_vec, tot_GST_on_imports) = calc_GST_on_imports(import_vec, rate_vec)
+(GST_on_imports_ind_vec, tot_GST_on_imports) = calc_GST_on_imports(use_mat, import_vec, rate_vec)
+make_vec_df(GST_on_imports_ind_vec, industry_header, "GST_imports.csv")
 
 # call the functions to calculate output tax and Input tax credit
 output_tax_mat = calc_output_tax(supply_less_exports_mat, rate_vec)
 input_tax_credit_mat = calc_input_tax_credit(use_for_ITC_mat, rate_vec)
 output_tax_vec = calc_sum_by_industry(output_tax_mat)
+output_tax_df = make_ind_df(output_tax_mat, industry_header, "output_tax.csv")
 input_tax_credit_vec = calc_sum_by_industry(input_tax_credit_mat)
 
 # calculate ITC disallowed which is based on the ratio of exempt sales to total sales
@@ -345,19 +362,25 @@ itc_disall_df.to_csv("itc_disall.csv")
 
 
 gst_potential_ind_less_import = output_tax_vec - net_itc_available_vec 
+gst_potential_ind_incl_import = output_tax_vec - net_itc_available_vec + GST_on_imports_ind_vec
 gst_potential_less_import_total = gst_potential_ind_less_import.sum()
+gst_potential_ind_incl_import_total = gst_potential_ind_incl_import.sum()
+
+make_vec_df(gst_potential_ind_incl_import, industry_header, "gst_potential.csv")
+
 gst_potential_total = gst_potential_less_import_total + tot_GST_on_imports 
 print(f'gst_potential_less_import_total: {gst_potential_less_import_total}')
 print(f'gst_potential_total: {gst_potential_total}')
+print(f'gst_potential_ind_incl_import_total: {gst_potential_ind_incl_import_total}')
 gst_pot_crores = gst_potential_ind_less_import/100
+gst_pot_crores_incl_imports = gst_potential_ind_incl_import/100
 
+#Grouping industries into broader classes for charts
 industry_group_df = pd.DataFrame(data=industry_group_header, index=industry_header, columns=np.array(['industry_group']))
 industry_group_df = industry_group_df.reset_index()
 industry_group_df = industry_group_df.rename(columns={'index':'industry_id'})
 industry_group_df.to_csv('industry.csv')
-
-
-
+'''
 gst_pot_crores = gst_pot_crores.reshape(gst_pot_crores.shape[1], 1)
 gst_coll_industry_df = pd.DataFrame(data=gst_pot_crores, index=industry_header, columns=np.array(['GST potential']))
 gst_coll_industry_df = gst_coll_industry_df.reset_index()
@@ -371,6 +394,23 @@ gst_coll_group_df = gst_coll_group_df.reset_index()
 
 industry_group = gst_coll_group_df['industry_group'].values
 gst_industry_group = gst_coll_group_df['GST potential'].values
+'''
+
+gst_pot_crores = gst_pot_crores_incl_imports.reshape(gst_pot_crores_incl_imports.shape[1], 1)
+gst_coll_industry_df = pd.DataFrame(data=gst_pot_crores, index=industry_header, columns=np.array(['GST potential']))
+gst_coll_industry_df = gst_coll_industry_df.reset_index()
+gst_coll_industry_df = gst_coll_industry_df.rename(columns={'index':'industry_id'})
+gst_coll_industry_df.to_csv('gst_coll.csv')
+gst_coll_industry_group_df = pd.merge(gst_coll_industry_df, industry_group_df,
+                            how="inner", on="industry_id")
+gst_coll_industry_group_df = gst_coll_industry_group_df[['industry_group', 'GST potential']]
+gst_coll_group_df = gst_coll_industry_group_df.groupby(['industry_group']).sum()
+gst_coll_group_df = gst_coll_group_df.reset_index()
+
+industry_group = gst_coll_group_df['industry_group'].values
+gst_industry_group = gst_coll_group_df['GST potential'].values
+
+
 
 plt.rcdefaults()
 fig, ax = plt.subplots(figsize=(8, 8))

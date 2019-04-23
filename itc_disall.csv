@@ -1,0 +1,67 @@
+,industry_id,industry
+0,"('Agriculture',)",4947593.934587198
+1,"('Livestock',)",872287.2890095277
+2,"('Forestry and Logging',)",298738.3774403548
+3,"('Fishing & Aquaculture',)",119772.05985653285
+4,"('Coal & Lignite',)",0.0
+5,"('Crude Petroleum',)",3779776.9515678925
+6,"('Natural Gas',)",0.0
+7,"('Iron Ores',)",0.0
+8,"('Non ferrous metal ores',)",0.0
+9,"('Other Mining',)",0.0
+10,"('Production, processing and preservation of meat, fish, fruit, vegetables, oils and fats',)",-26781.926163642103
+11,"('Manufacture of dairy products',)",1.2634747446446228
+12,"('Manufacture of grain mill products, etc. and animal feeds',)",-8713.912778697388
+13,"('Manufacture of other food products',)",2460.1647208296567
+14,"('Manufacture of beverages',)",124032.6224864383
+15,"('Manufacture of tobacco products',)",812.7745379908813
+16,"('Manufacture of textiles + cotton ginning',)",6681.8842830000995
+17,"('Manufacture of wearing apparel, except custom tailoring',)",638.7026042847513
+18,"('Manufacture of leather and related products',)",105.91848011233375
+19,"('Manufacture of Basic Iron and Steel + Casting of iron and steel',)",181075.09733716035
+20,"('Manufacture of basic precious and non-ferrous metals + Casting of non-ferrous metals',)",20407.58041536231
+21,"('Manufacture of fabricated metal products, except machinery and equipments',)",4759.528354816161
+22,"('Manufacture of electronic component, consumer electronics, magnetic and optical media',)",4.018953287572724
+23,"('Manufacture of computer and peripheral equipment',)",9.618859278742747e-06
+24,"('Manufacture of communication equipments',)",0.0
+25,"('Manufacture of optical and electronics products n.e.c',)",1.5696907197720928
+26,"('Manufacture of Electrical equipments',)",15845.427842158842
+27,"('Manufacture of machinery and equipments n.e.c',)",13907.857325722993
+28,"('Manufacture of Transport',)",10491.684829206995
+29,"('Manufacture of coke and refined petroleum products',)",2342.6051157311676
+30,"(' Manufacture of chemical and chemical products except pharmaceuticals, medicinal and botanical products',)",20322.64250822513
+31,"('Manufacture of pharmaceutical; medicinal chemicals and botanical products',)",-3914.749752453623
+32,"('Manufacture of rubber & plastic products',)",7841.689196887849
+33,"('Manufacture of other non-metallic mineral products',)",35224.36101781307
+34,"('Manufacture of wood and of products of wood and cork, except furniture; manufacture of articles of straw and plaiting material',)",-5.298748572717881
+35,"('Manufacture of paper and paper products',)",6385.947705450329
+36,"('Printing and reproduction of recorded media except publishing',)",40.874751116922766
+37,"('Manufacture of furniture',)",65.99786035104127
+38,"('Other Manufacturing',)",-1767.8284266929113
+39,"('Repair and installation of machinery and equipments',)",0.0
+40,"('Construction',)",-357.7504235276208
+41,"('Electricity',)",12555025.92931854
+42,"('Gas',)",0.0
+43,"('Water supply',)",855384.4401201566
+44,"('Railway Transport',)",0.0
+45,"('Land Transport',)",0.0
+46,"('Water Transport',)",0.0
+47,"('Air Transport',)",0.0
+48,"('Supportive & Auxilliary transport activities',)",0.0
+49,"('Storage & warehousing',)",0.0
+50,"('Communication',)",0.0
+51,"('Trade',)",0.0
+52,"('Hotels & Restaurant',)",-6534.988111148689
+53,"('Financial Services',)",0.0
+54,"('Insurance Services',)",0.0
+55,"('Ownership of dwellings',)",0.0
+56,"('Education & Research',)",0.0
+57,"('Medical and Health',)",0.0
+58,"('Legal Services',)",0.0
+59,"('Computer related services',)",0.0
+60,"('Other Business services',)",0.0
+61,"('Real estate activities',)",0.0
+62,"('Renting of machinery and equipment',)",0.0
+63,"('Community, Social & personal services',)",0.0
+64,"('Other services',)",0.0
+65,"('Public admn. & defence',)",-7010.26754953757
