@@ -1,0 +1,67 @@
+,industry_id,industry
+0,"('Agriculture',)",228432785.05062324
+1,"('Livestock',)",93787330.25963567
+2,"('Forestry and Logging',)",26983905.738611475
+3,"('Fishing & Aquaculture',)",15449125.959340522
+4,"('Coal & Lignite',)",15656520.99325228
+5,"('Crude Petroleum',)",28268435.023916524
+6,"('Natural Gas',)",9896121.809503704
+7,"('Iron Ores',)",7855357.035185127
+8,"('Non ferrous metal ores',)",2510044.114500979
+9,"('Other Mining',)",14664647.435085153
+10,"('Production, processing and preservation of meat, fish, fruit, vegetables, oils and fats',)",33411348.823203705
+11,"('Manufacture of dairy products',)",29405106.275118504
+12,"('Manufacture of grain mill products, etc. and animal feeds',)",39779643.66594357
+13,"('Manufacture of other food products',)",44646909.98294858
+14,"('Manufacture of beverages',)",10438576.09122634
+15,"('Manufacture of tobacco products',)",8347788.439539956
+16,"('Manufacture of textiles + cotton ginning',)",78601133.67310773
+17,"('Manufacture of wearing apparel, except custom tailoring',)",16085587.48723162
+18,"('Manufacture of leather and related products',)",9496769.070772389
+19,"('Manufacture of Basic Iron and Steel + Casting of iron and steel',)",105332341.00315817
+20,"('Manufacture of basic precious and non-ferrous metals + Casting of non-ferrous metals',)",29628147.609764844
+21,"('Manufacture of fabricated metal products, except machinery and equipments',)",44416835.83991733
+22,"('Manufacture of electronic component, consumer electronics, magnetic and optical media',)",9106124.84818628
+23,"('Manufacture of computer and peripheral equipment',)",3339914.0289489026
+24,"('Manufacture of communication equipments',)",1043684.3105005514
+25,"('Manufacture of optical and electronics products n.e.c',)",2600498.8457080955
+26,"('Manufacture of Electrical equipments',)",34947956.68271895
+27,"('Manufacture of machinery and equipments n.e.c',)",53901582.208215155
+28,"('Manufacture of Transport',)",91086338.36520423
+29,"('Manufacture of coke and refined petroleum products',)",234371415.8982452
+30,"(' Manufacture of chemical and chemical products except pharmaceuticals, medicinal and botanical products',)",69687251.32983306
+31,"('Manufacture of pharmaceutical; medicinal chemicals and botanical products',)",28654844.13479683
+32,"('Manufacture of rubber & plastic products',)",31413344.32937859
+33,"('Manufacture of other non-metallic mineral products',)",47809407.3548963
+34,"('Manufacture of wood and of products of wood and cork, except furniture; manufacture of articles of straw and plaiting material',)",11177984.781021928
+35,"('Manufacture of paper and paper products',)",11784646.354445232
+36,"('Printing and reproduction of recorded media except publishing',)",8800016.135293972
+37,"('Manufacture of furniture',)",12341672.472038431
+38,"('Other Manufacturing',)",-1567643.8916076329
+39,"('Repair and installation of machinery and equipments',)",1061762.6308271694
+40,"('Construction',)",373372380.50851077
+41,"('Electricity',)",70729021.10198832
+42,"('Gas',)",11811520.811961867
+43,"('Water supply',)",9546170.486000597
+44,"('Railway Transport',)",17722089.62687044
+45,"('Land Transport',)",103298450.23284508
+46,"('Water Transport',)",1755067.0417428322
+47,"('Air Transport',)",8523947.261582341
+48,"('Supportive & Auxilliary transport activities',)",22538099.411444012
+49,"('Storage & warehousing',)",1860394.2875250045
+50,"('Communication',)",56527876.44346789
+51,"('Trade',)",209560603.14064464
+52,"('Hotels & Restaurant',)",47812539.459135436
+53,"('Financial Services',)",100100412.69067785
+54,"('Insurance Services',)",19301393.607714564
+55,"('Ownership of dwellings',)",113173759.9421609
+56,"('Education & Research',)",61022334.364985384
+57,"('Medical and Health',)",30181918.35494153
+58,"('Legal Services',)",8225553.371372886
+59,"('Computer related services',)",60966665.80347904
+60,"('Other Business services',)",47874153.60044445
+61,"('Real estate activities',)",21679762.072689764
+62,"('Renting of machinery and equipment',)",4336097.511281759
+63,"('Community, Social & personal services',)",35031272.97149561
+64,"('Other services',)",14989048.474996548
+65,"('Public admn. & defence',)",117246863.98279463
