@@ -76,14 +76,14 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates,
     tax_subsidies_vec = df_supply.iloc[supply_mat_start_row-1:supply_mat_end_row,tax_subsidies_col-1]
     tax_subsidies_vec = tax_subsidies_vec.values
 
-    product_header = df_supply.iloc[supply_mat_start_row-1:supply_mat_end_row, supply_col_product_id-1]
+    product_header = df_supply.iloc[supply_mat_start_row-1:supply_mat_end_row, supply_col_product_id-2:supply_col_product_id]
     product_header = product_header.values
     industry_header = df_supply.iloc[supply_row_industry_id-1, supply_mat_start_col-1:supply_mat_end_col]
     industry_header = industry_header.values
 
     # Product Header Dataframe to ensure rates are correctly matched
-    df_product = pd.DataFrame(data = product_header, columns = np.array(['product_id']))
-
+    df_product = pd.DataFrame(data = product_header, columns = np.array(['srl_no', 'product_id']))
+    df_product['srl_no'] = df_product['srl_no'].astype(str)
     '''
     USE table
     '''
@@ -145,10 +145,18 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates,
     df_rates = pd.read_excel(filename, sheet_name_rates, index_col=False,
                            header=0)
     df_rates.fillna(0, inplace=True)
-    df_rates = df_rates[['product_id', 'rates']]
-    # merge with product id to ensure that the rates are correctly matched
-    df_rates = pd.merge(df_product, df_rates,
-                            how="inner", on="product_id")
+    df_rates['weighted_rates'] = df_rates['rates'] * df_rates['weight']
+    df_rates = df_rates.groupby(['srl_no'])["weighted_rates"].sum()
+    df_rates = df_rates.reset_index()
+    df_rates = df_rates.values
+    
+    df_rates = pd.DataFrame(data = df_rates, columns = np.array(['srl_no', 'rates']))
+    df_rates['srl_no'] = df_rates['srl_no'].astype(int)
+    df_rates['srl_no'] = df_rates['srl_no'].astype(str)
+    df_rates = pd.merge(df_rates, df_product,
+                            how="inner", on="srl_no")      
+    df_rates = df_rates[['product_id', 'rates']]    
+    
     rate_vec = df_rates['rates'].values
 
     '''
@@ -279,7 +287,7 @@ def make_mat_df(input_mat, industry_header, output):
 filename = 'India Supply Use Table SUT_12-13.xlsx'
 sheet_name_sup = 'supply 2012-13'
 sheet_name_use = 'use 2012-13'
-sheet_name_rates = 'rates'
+sheet_name_rates = 'detailed_rates'
 sheet_name_exempt = 'exempt'
 sheet_name_reg_ratio = 'gst_reg_ratio'
 supply_use_table_year = 2012
@@ -310,6 +318,7 @@ blow_up_factor = GDP_LCU[current_year]/GDP_LCU[supply_use_table_year]
                                                   fin_cons_gov_vec, gfcf_vec, vlbl_vec, cis_vec,
                                                   rate_vec, exempt_vec)
 
+gst_reg_ratio_ind_vec = gst_reg_ratio_ind_vec.reshape(1, gst_reg_ratio_ind_vec.shape[0])
 # Blow up the Supply Use Table and Vectors to current year
 (supply_mat, use_mat, import_vec, trade_margin_vec, tax_subsidies_vec, export_vec, fin_cons_hh_vec,
  fin_cons_gov_vec, gfcf_vec, vlbl_vec, cis_vec) = blow_up_mat(supply_mat, use_mat, import_vec,
@@ -368,12 +377,14 @@ itc_available_ind_vec = itc_ind_vec - itc_disallowed_ind_vec
 
 # Calculate the GST Potential
 gst_potential_less_import_vec = output_tax_ind_vec - itc_available_ind_vec
-gst_potential_less_import_total = gst_potential_less_import_vec.sum()
-gst_potential_ind_vec = gst_potential_less_import_vec + GST_on_imports_ind_vec
+gst_potential_less_import_vec_reg = gst_reg_ratio_ind_vec * gst_potential_less_import_vec
+gst_potential_less_import_total = gst_potential_less_import_vec_reg.sum()
+gst_potential_ind_vec = gst_potential_less_import_vec_reg + GST_on_imports_ind_vec
 gst_potential_total = gst_potential_ind_vec.sum()
 
 # Print GST Potential in Rs Crores
 print(f'GST Potential less imports (Rs Cr.): {gst_potential_less_import_total * 1e-2:.2f}')
+print(f'GST Potential on imports (Rs Cr.): {tot_GST_on_imports * 1e-2:.2f}')
 print(f'Total GST Potential (Rs Cr.): {gst_potential_total * 1e-2:.2f}')
 
 # Export the importatnt vectors for comparison
