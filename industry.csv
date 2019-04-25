@@ -1,67 +1,67 @@
 ,industry_id,industry_group
-0,"('Agriculture',)",Agriculture
-1,"('Livestock',)",Agriculture
-2,"('Forestry and Logging',)",Agriculture
-3,"('Fishing & Aquaculture',)",Agriculture
-4,"('Coal & Lignite',)",Mining
-5,"('Crude Petroleum',)",Mining
-6,"('Natural Gas',)",Mining
-7,"('Iron Ores',)",Mining
-8,"('Non ferrous metal ores',)",Mining
-9,"('Other Mining',)",Mining
-10,"('Production, processing and preservation of meat, fish, fruit, vegetables, oils and fats',)",Food Processing
-11,"('Manufacture of dairy products',)",Food Processing
-12,"('Manufacture of grain mill products, etc. and animal feeds',)",Food Processing
-13,"('Manufacture of other food products',)",Food Processing
-14,"('Manufacture of beverages',)",Food Processing
-15,"('Manufacture of tobacco products',)",Manufacturing
-16,"('Manufacture of textiles + cotton ginning',)",Manufacturing
-17,"('Manufacture of wearing apparel, except custom tailoring',)",Manufacturing
-18,"('Manufacture of leather and related products',)",Manufacturing
-19,"('Manufacture of Basic Iron and Steel + Casting of iron and steel',)",Manufacturing
-20,"('Manufacture of basic precious and non-ferrous metals + Casting of non-ferrous metals',)",Manufacturing
-21,"('Manufacture of fabricated metal products, except machinery and equipments',)",Manufacturing
-22,"('Manufacture of electronic component, consumer electronics, magnetic and optical media',)",Manufacturing
-23,"('Manufacture of computer and peripheral equipment',)",Manufacturing
-24,"('Manufacture of communication equipments',)",Manufacturing
-25,"('Manufacture of optical and electronics products n.e.c',)",Manufacturing
-26,"('Manufacture of Electrical equipments',)",Manufacturing
-27,"('Manufacture of machinery and equipments n.e.c',)",Manufacturing
-28,"('Manufacture of Transport',)",Manufacturing
-29,"('Manufacture of coke and refined petroleum products',)",Manufacturing
-30,"(' Manufacture of chemical and chemical products except pharmaceuticals, medicinal and botanical products',)",Manufacturing
-31,"('Manufacture of pharmaceutical; medicinal chemicals and botanical products',)",Manufacturing
-32,"('Manufacture of rubber & plastic products',)",Manufacturing
-33,"('Manufacture of other non-metallic mineral products',)",Manufacturing
-34,"('Manufacture of wood and of products of wood and cork, except furniture; manufacture of articles of straw and plaiting material',)",Manufacturing
-35,"('Manufacture of paper and paper products',)",Manufacturing
-36,"('Printing and reproduction of recorded media except publishing',)",Manufacturing
-37,"('Manufacture of furniture',)",Manufacturing
-38,"('Other Manufacturing',)",Manufacturing
-39,"('Repair and installation of machinery and equipments',)",Manufacturing Services
-40,"('Construction',)",Construction
-41,"('Electricity',)",Utilities
-42,"('Gas',)",Utilities
-43,"('Water supply',)",Utilities
-44,"('Railway Transport',)",Transport & Logistics
-45,"('Land Transport',)",Transport & Logistics
-46,"('Water Transport',)",Transport & Logistics
-47,"('Air Transport',)",Transport & Logistics
-48,"('Supportive & Auxilliary transport activities',)",Transport & Logistics
-49,"('Storage & warehousing',)",Transport & Logistics
-50,"('Communication',)",Communication
-51,"('Trade',)",Trade
-52,"('Hotels & Restaurant',)",Services
-53,"('Financial Services',)",Financial Services
-54,"('Insurance Services',)",Financial Services
-55,"('Ownership of dwellings',)",Housing
-56,"('Education & Research',)",Education
-57,"('Medical and Health',)",Health
-58,"('Legal Services',)",Services
-59,"('Computer related services',)",Services
-60,"('Other Business services',)",Services
-61,"('Real estate activities',)",Housing
-62,"('Renting of machinery and equipment',)",Services
-63,"('Community, Social & personal services',)",Services
-64,"('Other services',)",Services
-65,"('Public admn. & defence',)",Public Administration
+0,Agriculture,Agriculture
+1,Livestock,Agriculture
+2,Forestry and Logging,Agriculture
+3,Fishing & Aquaculture,Agriculture
+4,Coal & Lignite,Mining
+5,Crude Petroleum,Mining
+6,Natural Gas,Mining
+7,Iron Ores,Mining
+8,Non ferrous metal ores,Mining
+9,Other Mining,Mining
+10,"Production, processing and preservation of meat, fish, fruit, vegetables, oils and fats",Food Processing
+11,Manufacture of dairy products,Food Processing
+12,"Manufacture of grain mill products, etc. and animal feeds",Food Processing
+13,Manufacture of other food products,Food Processing
+14,Manufacture of beverages,Food Processing
+15,Manufacture of tobacco products,Manufacturing
+16,Manufacture of textiles + cotton ginning,Manufacturing
+17,"Manufacture of wearing apparel, except custom tailoring",Manufacturing
+18,Manufacture of leather and related products,Manufacturing
+19,Manufacture of Basic Iron and Steel + Casting of iron and steel,Manufacturing
+20,Manufacture of basic precious and non-ferrous metals + Casting of non-ferrous metals,Manufacturing
+21,"Manufacture of fabricated metal products, except machinery and equipments",Manufacturing
+22,"Manufacture of electronic component, consumer electronics, magnetic and optical media",Manufacturing
+23,Manufacture of computer and peripheral equipment,Manufacturing
+24,Manufacture of communication equipments,Manufacturing
+25,Manufacture of optical and electronics products n.e.c,Manufacturing
+26,Manufacture of Electrical equipments,Manufacturing
+27,Manufacture of machinery and equipments n.e.c,Manufacturing
+28,Manufacture of Transport,Manufacturing
+29,Manufacture of coke and refined petroleum products,Manufacturing
+30," Manufacture of chemical and chemical products except pharmaceuticals, medicinal and botanical products",Manufacturing
+31,Manufacture of pharmaceutical; medicinal chemicals and botanical products,Manufacturing
+32,Manufacture of rubber & plastic products,Manufacturing
+33,Manufacture of other non-metallic mineral products,Manufacturing
+34,"Manufacture of wood and of products of wood and cork, except furniture; manufacture of articles of straw and plaiting material",Manufacturing
+35,Manufacture of paper and paper products,Manufacturing
+36,Printing and reproduction of recorded media except publishing,Manufacturing
+37,Manufacture of furniture,Manufacturing
+38,Other Manufacturing,Manufacturing
+39,Repair and installation of machinery and equipments,Manufacturing Services
+40,Construction,Construction
+41,Electricity,Utilities
+42,Gas,Utilities
+43,Water supply,Utilities
+44,Railway Transport,Transport & Logistics
+45,Land Transport,Transport & Logistics
+46,Water Transport,Transport & Logistics
+47,Air Transport,Transport & Logistics
+48,Supportive & Auxilliary transport activities,Transport & Logistics
+49,Storage & warehousing,Transport & Logistics
+50,Communication,Communication
+51,Trade,Trade
+52,Hotels & Restaurant,Services
+53,Financial Services,Financial Services
+54,Insurance Services,Financial Services
+55,Ownership of dwellings,Housing
+56,Education & Research,Education
+57,Medical and Health,Health
+58,Legal Services,Services
+59,Computer related services,Services
+60,Other Business services,Services
+61,Real estate activities,Housing
+62,Renting of machinery and equipment,Services
+63,"Community, Social & personal services",Services
+64,Other services,Services
+65,Public admn. & defence,Public Administration
