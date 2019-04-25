@@ -264,16 +264,16 @@ def calc_GST_on_imports(use_mat, import_vec, rate_vec):
 def make_ind_vec_df(input_vec, industry_header, output):
     input_vec = input_vec.reshape(input_vec.shape[1], 1)
     industry_header = industry_header.reshape(industry_header.shape[0], 1)
-    ind_df = pd.DataFrame(data=input_vec, index=industry_header, columns=np.array(['industry']))
+    ind_df = pd.DataFrame(data=input_vec, index=industry_header, columns=np.array([output]))
     ind_df = ind_df.reset_index()
-    ind_df = ind_df.rename(columns={'index':output})
+    ind_df = ind_df.rename(columns={'index':'industry_id'})
     file_name = "Output_csv\\" + output + ".csv"
     ind_df.to_csv(file_name)
 
 # Function to export a matrix to a csv file vy converting it into vector by industry
-def make_mat_df(input_mat, industry_header, file_name):
+def make_mat_df(input_mat, industry_header, output):
     input_vec = calc_sum_by_industry(input_mat)
-    make_ind_vec_df(input_vec, industry_header, file_name)
+    make_ind_vec_df(input_vec, industry_header, output)
     
 
 filename = 'India Supply Use Table SUT_12-13.xlsx'
