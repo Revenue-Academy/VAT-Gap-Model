@@ -261,12 +261,13 @@ def calc_GST_on_imports(use_mat, import_vec, rate_vec):
     return (GST_on_imports_ind_vec, tot_GST_on_imports)
 
 # Function to export a Vector by industry to a csv file
-def make_ind_vec_df(input_vec, industry_header, file_name):
+def make_ind_vec_df(input_vec, industry_header, output):
     input_vec = input_vec.reshape(input_vec.shape[1], 1)
     industry_header = industry_header.reshape(industry_header.shape[0], 1)
     ind_df = pd.DataFrame(data=input_vec, index=industry_header, columns=np.array(['industry']))
     ind_df = ind_df.reset_index()
-    ind_df = ind_df.rename(columns={'index':'industry_id'})
+    ind_df = ind_df.rename(columns={'index':output})
+    file_name = "Output_csv\\" + output + ".csv"
     ind_df.to_csv(file_name)
 
 # Function to export a matrix to a csv file vy converting it into vector by industry
@@ -376,22 +377,22 @@ print(f'GST Potential less imports (Rs Cr.): {gst_potential_less_import_total * 
 print(f'Total GST Potential (Rs Cr.): {gst_potential_total * 1e-2:.2f}')
 
 # Export the importatnt vectors for comparison
-make_mat_df(export_mat, industry_header, "export_ind.csv")
-make_mat_df(supply_mat, industry_header, "supply_ind.csv")
-make_mat_df(import_mat, industry_header, "import_ind.csv")
-make_mat_df(supply_less_exports_mat, industry_header, "dom_supply.csv")
-make_mat_df(output_tax_mat, industry_header, "output_tax.csv")
-make_mat_df(exempt_supply_mat, industry_header, "exempt_ind.csv")
-make_mat_df(input_tax_credit_mat, industry_header, "itc_ind.csv")
-make_ind_vec_df(itc_disallowed_ind_vec, industry_header, "itc_disall.csv")
-make_ind_vec_df(GST_on_imports_ind_vec, industry_header, "GST_imports.csv")
-make_ind_vec_df(gst_potential_ind_vec, industry_header, "gst_potential.csv")
+make_mat_df(export_mat, industry_header, "export_ind")
+make_mat_df(supply_mat, industry_header, "supply_ind")
+make_mat_df(import_mat, industry_header, "import_ind")
+make_mat_df(supply_less_exports_mat, industry_header, "dom_supply")
+make_mat_df(output_tax_mat, industry_header, "output_tax")
+make_mat_df(exempt_supply_mat, industry_header, "exempt_ind")
+make_mat_df(input_tax_credit_mat, industry_header, "itc_ind")
+make_ind_vec_df(itc_disallowed_ind_vec, industry_header, "itc_disall")
+make_ind_vec_df(GST_on_imports_ind_vec, industry_header, "GST_imports")
+make_ind_vec_df(gst_potential_ind_vec, industry_header, "gst_potential")
 
 # Grouping industries into broader classes for charts
 industry_group_df = pd.DataFrame(data=industry_group_header, index=industry_header, columns=np.array(['industry_group']))
 industry_group_df = industry_group_df.reset_index()
 industry_group_df = industry_group_df.rename(columns={'index':'industry_id'})
-industry_group_df.to_csv('industry.csv')
+industry_group_df.to_csv('Output_csv\industry.csv')
 
 gst_pot_less_import_crores = gst_potential_less_import_vec/100
 gst_pot_ind_crores = gst_potential_ind_vec/100
@@ -399,7 +400,7 @@ gst_pot_crores = gst_pot_ind_crores.reshape(gst_pot_ind_crores.shape[1], 1)
 gst_coll_industry_df = pd.DataFrame(data=gst_pot_crores, index=industry_header, columns=np.array(['GST potential']))
 gst_coll_industry_df = gst_coll_industry_df.reset_index()
 gst_coll_industry_df = gst_coll_industry_df.rename(columns={'index':'industry_id'})
-gst_coll_industry_df.to_csv('gst_coll.csv')
+gst_coll_industry_df.to_csv('Output_csv\gst_coll.csv')
 gst_coll_industry_group_df = pd.merge(gst_coll_industry_df, industry_group_df,
                             how="inner", on="industry_id")
 gst_coll_industry_group_df = gst_coll_industry_group_df[['industry_group', 'GST potential']]
