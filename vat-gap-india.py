@@ -154,7 +154,7 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates,
     df_rates['srl_no'] = df_rates['srl_no'].astype(int)
     df_rates['srl_no'] = df_rates['srl_no'].astype(str)
     df_rates = pd.merge(df_rates, df_product,
-                            how="inner", on="srl_no")      
+                            how="inner", on="srl_no")        
     df_rates = df_rates[['product_id', 'rates']]    
     
     rate_vec = df_rates['rates'].values
@@ -238,7 +238,7 @@ def calc_allocation_ratio(input_mat):
     sum_by_prod_vec = input_mat.sum(axis=1)
     sum_by_prod_vec = sum_by_prod_vec.reshape(sum_by_prod_vec.shape[0],1)
     # dividing use_mat by iiuse_vec while avoiding zero by zero
-    output_mat = np.divide(use_mat, sum_by_prod_vec,
+    output_mat = np.divide(input_mat, sum_by_prod_vec,
                            out=np.zeros_like(input_mat), where=sum_by_prod_vec!=0)
     return output_mat
 
@@ -283,8 +283,133 @@ def make_mat_df(input_mat, industry_header, output):
     input_vec = calc_sum_by_industry(input_mat)
     make_ind_vec_df(input_vec, industry_header, output)
     
+def hsn_tax_ratio(filename, sheet_name_cash_ratio, sheet_name_gstr1, gst_collection_full_year_dom):   
+    tax_cash_df = pd.read_excel(filename, sheet_name_cash_ratio, index_col=False)
+    tax_cash_df.fillna(0, inplace=True)
+    tax_cash_df['cash_tax_payable_ratio'] = tax_cash_df['tax_cash']/tax_cash_df['tax_payable']
 
-filename = 'India Supply Use Table SUT_12-13.xlsx'
+    tax_cash_df['HSN2'] = np.where(tax_cash_df['HSN2']>9, tax_cash_df['HSN2'].astype(str),
+                                ('0'+ tax_cash_df['HSN2'].astype(str)))
+    
+    df_gstr1 = pd.read_excel(filename, sheet_name_gstr1, index_col=False)
+    df_gstr1.fillna(0, inplace=True)
+    df_gstr1['HSN2'] = np.where(df_gstr1['HSN2']>9, df_gstr1['HSN2'].astype(str),
+                                ('0'+ df_gstr1['HSN2'].astype(str)))
+   
+    # Data is for 8 months now grossedup to one year
+    df_gstr1['gstr1_tax_payable'] = df_gstr1['gstr1_tax_payable'] * (12/8)
+    tax_cash_df = pd.merge(tax_cash_df, df_gstr1,
+                            how="inner", on="HSN2")    
+    tax_cash_df['tax_cash'] = (tax_cash_df['cash_tax_payable_ratio'] * 
+                                 tax_cash_df['gstr1_tax_payable'])
+    tax_collection_gstr1 = tax_cash_df['tax_cash'].sum()
+    # GSTR1 does not explain all the tax so blow up
+    blow_up_factor = (gst_collection_full_year_dom/tax_collection_gstr1)
+    tax_cash_df['tax_payable_bu'] = df_gstr1['gstr1_tax_payable']*blow_up_factor
+    tax_cash_df['tax_cash_bu'] = tax_cash_df['tax_cash']*blow_up_factor
+    tax_cash_df['tax_itc_bu'] = (tax_cash_df['tax_payable_bu'] - 
+                                         tax_cash_df['tax_cash_bu'])
+    #tax_cash_dom_less_trade = tax_cash_df['tax_cash_bu'].sum()
+    return tax_cash_df
+
+
+def calc_hsn_sut_conc(filename, concordance_sheet):
+    concordance_df = pd.read_excel(filename, concordance_sheet, index_col=False)
+    hsn_df = concordance_df.sort_values(['HSN2', 'srl_no'])
+    hsn_df['HSN2'] = np.where(hsn_df['HSN2']>9, hsn_df['HSN2'].astype(str),
+                                ('0'+ hsn_df['HSN2'].astype(str)))
+    hsn_df['key'] = hsn_df['srl_no'].astype(str) + '_' + hsn_df['HSN2']
+    hsn_df = hsn_df.drop_duplicates(subset='key', keep='first')
+    hsn_df = hsn_df.reset_index()
+    hsn_df = hsn_df.drop(['index', 'key', 'HSN', 'product_id'], axis=1)
+    hsn_df['srl_no'] = hsn_df['srl_no'].astype(str)
+    return hsn_df
+
+
+def concord_comm_vec(hsn_df_copy, alloc_mat, alloc_var ):
+    alloc_comm_vec = calc_sum_by_commodity(alloc_mat)
+    alloc_comm_vec_df = pd.DataFrame(data=alloc_comm_vec, columns=np.array([alloc_var]))
+    alloc_comm_vec_df = alloc_comm_vec_df.reset_index()
+    alloc_comm_vec_df = alloc_comm_vec_df.rename(columns={'index':'srl_no'})
+    alloc_comm_vec_df['srl_no'] = alloc_comm_vec_df['srl_no'] + 1
+    alloc_comm_vec_df['srl_no'] = alloc_comm_vec_df['srl_no'].astype(str)  
+    hsn_df_copy = pd.merge(hsn_df_copy, alloc_comm_vec_df,
+                                how="outer", on="srl_no")   
+    alloc_hsn2 = hsn_df_copy.groupby('HSN2')[alloc_var].sum()
+    alloc_hsn2 = alloc_hsn2.values
+    alloc_hsn2_df = pd.DataFrame(data=alloc_hsn2, columns=np.array([alloc_var+'_hsn2']))
+    alloc_hsn2_df = alloc_hsn2_df.reset_index()
+    alloc_hsn2_df = alloc_hsn2_df.rename(columns={'index':'HSN2'})
+    alloc_hsn2_df['HSN2'] = np.where(alloc_hsn2_df['HSN2']>9, alloc_hsn2_df['HSN2'].astype(str),
+                                    ('0'+ alloc_hsn2_df['HSN2'].astype(str)))
+    hsn_df_copy = pd.merge(hsn_df_copy, alloc_hsn2_df,
+                                how="outer", on="HSN2")
+    #hsn_df.groupby('HSN2')['tax_cash_bu'].mean().sum()
+    hsn_df_copy = hsn_df_copy.dropna()
+    #hsn_df.groupby('HSN2')['tax_cash_bu'].mean().sum()
+    hsn_df_copy['srl_HSN_wt'] = hsn_df_copy[alloc_var]/hsn_df_copy[alloc_var+'_hsn2']
+    #hsn_df.groupby('HSN2')['tax_cash_bu'].mean().sum()
+    hsn_df_copy = hsn_df_copy.sort_values('HSN2')
+    #hsn_df[['srl_no', 'HSN2', 'tax_cash_bu', 'srl_HSN_wt']]
+    if alloc_var=='supply':
+        hsn_df_copy['alloc_var_srl_no'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_payable_bu']
+    else:
+        if alloc_var=='use':
+            hsn_df_copy['alloc_var_srl_no'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_itc_bu']
+        else:
+            if alloc_var=='etr':
+                hsn_df_copy['alloc_var_srl_no1'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['taxable_value']
+                hsn_df_copy['alloc_var_srl_no2'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_cash']            
+    hsn_df_copy = hsn_df_copy.sort_values('srl_no')
+    #grouping by serial number as multiple entries are there
+    if alloc_var=='etr':
+        srl_no_alloc_var1 = hsn_df_copy.groupby('srl_no')['alloc_var_srl_no1'].sum()
+        srl_no_alloc_var2 = hsn_df_copy.groupby('srl_no')['alloc_var_srl_no2'].sum()       
+        hsn_df_copy['alloc_var_srl_no'] = srl_no_alloc_var1/srl_no_alloc_var2
+    
+    srl_no_alloc_var = hsn_df_copy.groupby('srl_no')['alloc_var_srl_no'].sum()
+    #hsn_df[['srl_no', 'HSN2', 'tax_cash_bu', 'srl_HSN_wt', 'tax_cash_bu_srl_no']]
+    srl_no_alloc_var_df = srl_no_alloc_var.reset_index()
+    srl_no_alloc_var_df['srl_no'] = srl_no_alloc_var_df['srl_no'].astype(int)
+    srl_no_alloc_var_df = srl_no_alloc_var_df.sort_values('srl_no')
+    #srl_no_alloc_var_df.to_csv('srl_no_tax_cash.csv')   
+    srl_no_alloc_var_vec = srl_no_alloc_var_df['alloc_var_srl_no'].values
+    srl_no_alloc_var_vec = srl_no_alloc_var_vec.reshape(srl_no_alloc_var_vec.shape[0], 1)
+    return srl_no_alloc_var_vec
+
+def concord_ind_vec(srl_no_alloc_var_vec, allocation_ratio):
+    alloc_var_mat = calc_allocation_to_industry(allocation_ratio, srl_no_alloc_var_vec)
+    alloc_var_ind_vec = calc_sum_by_industry(alloc_var_mat)
+    return alloc_var_ind_vec
+    
+
+
+
+filename_concordance = 'concordance_2.xlsx'
+sheet_name_cash_ratio = 'tax_output_tax_ratio'
+sheet_name_gstr1 = 'gstr1'
+concordance_sheet = 'concordance'
+
+gst_collection_july17_march18 = 7.41*10**5
+igst_import_july17_march18 = 1.73 * 10**5
+gst_collection_july17_june18 = gst_collection_july17_march18 * (12/8)
+igst_import_july17_june18 = igst_import_july17_march18 * (12/8)
+gst_collection_july17_june18_dom = (gst_collection_july17_june18 - 
+                                    igst_import_july17_june18)
+
+SUT_trade_margin = 138695029/100
+#assuming average rate of 10%
+avg_gst_rate_trade = 0.1
+gst_trade = SUT_trade_margin*avg_gst_rate_trade
+
+gst_collection_july17_june18_dom_less_trade = (gst_collection_july17_june18_dom -
+                                               gst_trade)
+
+gst_collection_full_year_dom = gst_collection_july17_june18_dom_less_trade
+
+tax_cash_df = hsn_tax_ratio(filename_concordance, sheet_name_cash_ratio, sheet_name_gstr1, gst_collection_july17_june18_dom_less_trade)   
+
+filename_SUT = 'India Supply Use Table SUT_12-13.xlsx'
 sheet_name_sup = 'supply 2012-13'
 sheet_name_use = 'use 2012-13'
 sheet_name_rates = 'detailed_rates'
@@ -308,7 +433,7 @@ blow_up_factor = GDP_LCU[current_year]/GDP_LCU[supply_use_table_year]
 (supply_mat, tax_subsidies_vec, import_vec, trade_margin_vec, industry_header,
  product_header, use_mat, fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec,
  vlbl_vec, cis_vec, export_vec, gst_reg_ratio_ind_vec, industry_group_header,
- rate_vec, exempt_vec) = import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, 
+ rate_vec, exempt_vec) = import_Excel_SUT(filename_SUT, sheet_name_sup, sheet_name_use, 
                      sheet_name_rates, sheet_name_exempt, sheet_name_reg_ratio)
 
 # reshape all vectors to column arrays
@@ -358,6 +483,28 @@ export_mat = calc_allocation_to_industry(allocation_ratio_by_supply_mat, export_
 
 # Reducing the exports from supply to get domestic comsumption
 supply_less_exports_mat = supply_mat - export_mat
+
+# Calculating Actual GST By Sector
+# importing concrdance file
+hsn_df = calc_hsn_sut_conc(filename_concordance, concordance_sheet)
+# merging concordance file with tax data
+hsn_df = pd.merge(hsn_df, tax_cash_df,
+                            how="outer", on="HSN2")
+hsn_df_copy = hsn_df.copy()
+tax_payable_comm_vec = concord_comm_vec(hsn_df_copy, supply_mat, 'supply')
+hsn_df_copy = hsn_df.copy()
+tax_itc_comm_vec = concord_comm_vec(hsn_df_copy, use_mat, 'use')
+hsn_df_copy = hsn_df.copy()
+etr_comm_vec = concord_comm_vec(hsn_df_copy, supply_mat, 'etr')
+
+np.savetxt("etr.csv", etr_comm_vec , delimiter=",")
+
+tax_payable_ind_vec = concord_ind_vec(tax_payable_comm_vec, allocation_ratio_by_supply_mat)
+tax_itc_ind_vec = concord_ind_vec(tax_itc_comm_vec, allocation_ratio_by_use_mat)
+tax_cash_ind_vec = tax_payable_ind_vec - tax_itc_ind_vec
+make_ind_vec_df(tax_payable_ind_vec, industry_header, 'tax_payable_ind')
+make_ind_vec_df(tax_itc_ind_vec, industry_header, 'tax_itc_ind')
+make_ind_vec_df(tax_cash_ind_vec, industry_header, 'tax_cash_ind')
 
 # call functions to calculate output tax and Input tax credit
 output_tax_mat = calc_output_tax(supply_less_exports_mat, rate_vec)
@@ -420,6 +567,8 @@ gst_coll_group_df = gst_coll_group_df.reset_index()
 
 industry_group = gst_coll_group_df['industry_group'].values
 gst_industry_group = gst_coll_group_df['GST potential'].values
+
+
 
 '''
 Draw charts for displaying outputs

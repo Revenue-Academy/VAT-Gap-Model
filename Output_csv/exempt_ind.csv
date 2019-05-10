@@ -1,20 +1,20 @@
 ,industry_id,exempt_ind
-0,"('Agriculture',)",207374993.93949372
-1,"('Livestock',)",73860519.92790313
-2,"('Forestry and Logging',)",9261864.7908747
-3,"('Fishing & Aquaculture',)",15881852.427406702
+0,"('Agriculture',)",201297853.34052262
+1,"('Livestock',)",74073920.83862975
+2,"('Forestry and Logging',)",9261102.805731947
+3,"('Fishing & Aquaculture',)",15446322.343880111
 4,"('Coal & Lignite',)",0.0
 5,"('Crude Petroleum',)",29833234.836331066
 6,"('Natural Gas',)",0.0
 7,"('Iron Ores',)",0.0
 8,"('Non ferrous metal ores',)",0.0
 9,"('Other Mining',)",0.0
-10,"('Production, processing and preservation of meat, fish, fruit, vegetables, oils and fats',)",-1420449.3014501508
-11,"('Manufacture of dairy products',)",878.2946160861268
-12,"('Manufacture of grain mill products, etc. and animal feeds',)",-535618.2909985106
-13,"('Manufacture of other food products',)",245838.24869824835
-14,"('Manufacture of beverages',)",7340267.189375471
-15,"('Manufacture of tobacco products',)",7546.510962482801
+10,"('Production, processing and preservation of meat, fish, fruit, vegetables, oils and fats',)",82685.01715659762
+11,"('Manufacture of dairy products',)",881.1659655519071
+12,"('Manufacture of grain mill products, etc. and animal feeds',)",15301.555021010625
+13,"('Manufacture of other food products',)",738711.5234728396
+14,"('Manufacture of beverages',)",7127494.82196461
+15,"('Manufacture of tobacco products',)",7576.696061139538
 16,"('Manufacture of textiles + cotton ginning',)",116429.51661254228
 17,"('Manufacture of wearing apparel, except custom tailoring',)",6731.65671324294
 18,"('Manufacture of leather and related products',)",2118.529590491657
@@ -28,19 +28,19 @@
 26,"('Manufacture of Electrical equipments',)",63346.97370500872
 27,"('Manufacture of machinery and equipments n.e.c',)",49246.26020481806
 28,"('Manufacture of Transport',)",44472.68052521375
-29,"('Manufacture of coke and refined petroleum products',)",120387.3767841385
-30,"(' Manufacture of chemical and chemical products except pharmaceuticals, medicinal and botanical products',)",124294.23218577221
-31,"('Manufacture of pharmaceutical; medicinal chemicals and botanical products',)",-39948.86070652597
-32,"('Manufacture of rubber & plastic products',)",38202.117991851745
-33,"('Manufacture of other non-metallic mineral products',)",295308.2795164348
-34,"('Manufacture of wood and of products of wood and cork, except furniture; manufacture of articles of straw and plaiting material',)",-67.03240112759265
-35,"('Manufacture of paper and paper products',)",26261.03928866671
+29,"('Manufacture of coke and refined petroleum products',)",120393.35127291501
+30,"(' Manufacture of chemical and chemical products except pharmaceuticals, medicinal and botanical products',)",191228.55261155547
+31,"('Manufacture of pharmaceutical; medicinal chemicals and botanical products',)",3666.1822948642343
+32,"('Manufacture of rubber & plastic products',)",38202.28169740076
+33,"('Manufacture of other non-metallic mineral products',)",295316.9840008578
+34,"('Manufacture of wood and of products of wood and cork, except furniture; manufacture of articles of straw and plaiting material',)",50.70637633922331
+35,"('Manufacture of paper and paper products',)",26351.398449451677
 36,"('Printing and reproduction of recorded media except publishing',)",357.52285773868596
 37,"('Manufacture of furniture',)",673.1360977063354
-38,"('Other Manufacturing',)",2342.121878997205
+38,"('Other Manufacturing',)",2342.1296080791753
 39,"('Repair and installation of machinery and equipments',)",0.0
-40,"('Construction',)",-3324.7694419995155
-41,"('Electricity',)",80659647.55669716
+40,"('Construction',)",0.0
+41,"('Electricity',)",80659908.10146007
 42,"('Gas',)",0.0
 43,"('Water supply',)",10488845.947518218
 44,"('Railway Transport',)",0.0
@@ -51,7 +51,7 @@
 49,"('Storage & warehousing',)",0.0
 50,"('Communication',)",0.0
 51,"('Trade',)",0.0
-52,"('Hotels & Restaurant',)",-211054.9774332755
+52,"('Hotels & Restaurant',)",0.0
 53,"('Financial Services',)",0.0
 54,"('Insurance Services',)",0.0
 55,"('Ownership of dwellings',)",0.0
@@ -64,4 +64,4 @@
 62,"('Renting of machinery and equipment',)",0.0
 63,"('Community, Social & personal services',)",0.0
 64,"('Other services',)",0.0
-65,"('Public admn. & defence',)",-105080.52364011551
+65,"('Public admn. & defence',)",0.0
