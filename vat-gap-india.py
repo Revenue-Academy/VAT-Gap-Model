@@ -2,7 +2,7 @@ import string
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
+from in_rupees import *
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -204,6 +204,11 @@ def blow_up_mat(supply_mat, use_mat, import_vec, trade_margin_vec, tax_subsidies
             tax_subsidies_vec, export_vec, fin_cons_hh_vec,
             fin_cons_gov_vec, gfcf_vec, vlbl_vec, cis_vec)
 
+def adjusted_SUT(gst_reg_ratio_ind_vec, input_mat):
+    adj_input_mat = gst_reg_ratio_ind_vec*input_mat
+    return adj_input_mat
+    
+    
 def calc_output_tax(supply_mat, rate_vec):
     output_tax_mat = supply_mat * rate_vec
     return output_tax_mat
@@ -211,8 +216,9 @@ def calc_output_tax(supply_mat, rate_vec):
 def calc_itc_disallowed_ratio(supply_mat, exempt_vec):
     exempt_supply_mat = supply_mat * exempt_vec
     exempt_supply_ind_vec = calc_sum_by_industry(exempt_supply_mat)
-    supply_ind_vec = calc_sum_by_industry(supply_mat)
-    itc_disallowed_ratio = exempt_supply_ind_vec/supply_ind_vec
+    supply_ind_vec = calc_sum_by_industry(supply_mat)  
+    itc_disallowed_ratio = np.divide(exempt_supply_ind_vec, supply_ind_vec,
+                                     out=np.zeros_like(exempt_supply_ind_vec), where=supply_ind_vec!=0)
     return (itc_disallowed_ratio, exempt_supply_mat)
 
 def calc_itc_disallowed(input_tax_credit_vec, itc_disallowed_ratio):
@@ -271,12 +277,12 @@ def calc_GST_on_imports(use_mat, import_vec, rate_vec):
 # Function to export a Vector by industry to a csv file
 def make_ind_vec_df(input_vec, industry_header, output):
     input_vec = input_vec.reshape(input_vec.shape[1], 1)
-    industry_header = industry_header.reshape(industry_header.shape[0], 1)
     ind_df = pd.DataFrame(data=input_vec, index=industry_header, columns=np.array([output]))
     ind_df = ind_df.reset_index()
     ind_df = ind_df.rename(columns={'index':'industry_id'})
     file_name = "Output_csv\\" + output + ".csv"
     ind_df.to_csv(file_name)
+    return ind_df
 
 # Function to export a matrix to a csv file vy converting it into vector by industry
 def make_mat_df(input_mat, industry_header, output):
@@ -326,7 +332,8 @@ def calc_hsn_sut_conc(filename, concordance_sheet):
     return hsn_df
 
 
-def concord_comm_vec(hsn_df_copy, alloc_mat, alloc_var ):
+def concord_comm_vec(hsn_df_copy, alloc_mat, alloc_var):
+    # concording the srl_no data and allocating to industry
     alloc_comm_vec = calc_sum_by_commodity(alloc_mat)
     alloc_comm_vec_df = pd.DataFrame(data=alloc_comm_vec, columns=np.array([alloc_var]))
     alloc_comm_vec_df = alloc_comm_vec_df.reset_index()
@@ -351,15 +358,18 @@ def concord_comm_vec(hsn_df_copy, alloc_mat, alloc_var ):
     #hsn_df.groupby('HSN2')['tax_cash_bu'].mean().sum()
     hsn_df_copy = hsn_df_copy.sort_values('HSN2')
     #hsn_df[['srl_no', 'HSN2', 'tax_cash_bu', 'srl_HSN_wt']]
-    if alloc_var=='supply':
+    if alloc_var=='output tax':
         hsn_df_copy['alloc_var_srl_no'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_payable_bu']
     else:
-        if alloc_var=='use':
+        if alloc_var=='itc':
             hsn_df_copy['alloc_var_srl_no'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_itc_bu']
-        else:
-            if alloc_var=='etr':
-                hsn_df_copy['alloc_var_srl_no1'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['taxable_value']
-                hsn_df_copy['alloc_var_srl_no2'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_cash']            
+        else: 
+            if alloc_var=='tax':
+                hsn_df_copy['alloc_var_srl_no'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_cash_bu']            
+            else:
+                if alloc_var=='etr':
+                    hsn_df_copy['alloc_var_srl_no1'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['taxable_value']
+                    hsn_df_copy['alloc_var_srl_no2'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_cash']
     hsn_df_copy = hsn_df_copy.sort_values('srl_no')
     #grouping by serial number as multiple entries are there
     if alloc_var=='etr':
@@ -379,6 +389,7 @@ def concord_comm_vec(hsn_df_copy, alloc_mat, alloc_var ):
 
 def concord_ind_vec(srl_no_alloc_var_vec, allocation_ratio):
     alloc_var_mat = calc_allocation_to_industry(allocation_ratio, srl_no_alloc_var_vec)
+    np.savetxt("alloc_sec.csv", alloc_var_mat , delimiter=",")
     alloc_var_ind_vec = calc_sum_by_industry(alloc_var_mat)
     return alloc_var_ind_vec
     
@@ -392,8 +403,8 @@ concordance_sheet = 'concordance'
 
 gst_collection_july17_march18 = 7.41*10**5
 igst_import_july17_march18 = 1.73 * 10**5
-gst_collection_july17_june18 = gst_collection_july17_march18 * (12/8)
-igst_import_july17_june18 = igst_import_july17_march18 * (12/8)
+gst_collection_july17_june18 = gst_collection_july17_march18 * (12/9)
+igst_import_july17_june18 = igst_import_july17_march18 * (12/9)
 gst_collection_july17_june18_dom = (gst_collection_july17_june18 - 
                                     igst_import_july17_june18)
 
@@ -451,6 +462,11 @@ gst_reg_ratio_ind_vec = gst_reg_ratio_ind_vec.reshape(1, gst_reg_ratio_ind_vec.s
                                               fin_cons_hh_vec, fin_cons_gov_vec, gfcf_vec, vlbl_vec,
                                               cis_vec, blow_up_factor)
 
+np.savetxt("rate_vec.csv", rate_vec , delimiter=",")
+
+supply_mat = adjusted_SUT(gst_reg_ratio_ind_vec, supply_mat)
+use_mat = adjusted_SUT(gst_reg_ratio_ind_vec, use_mat)
+
 # Call function to find the ratio of allocation to be used for imports and tax & subsidies
 allocation_ratio_by_use_mat = calc_allocation_ratio(use_mat)
 
@@ -487,24 +503,47 @@ supply_less_exports_mat = supply_mat - export_mat
 # Calculating Actual GST By Sector
 # importing concrdance file
 hsn_df = calc_hsn_sut_conc(filename_concordance, concordance_sheet)
-# merging concordance file with tax data
+# merging concordance file HSN to Srl_no mapping with tax data which has
+# collection by HSN
 hsn_df = pd.merge(hsn_df, tax_cash_df,
                             how="outer", on="HSN2")
+# concording output tax collection from HSN2 to Srl_no using supply table for
+# weights for allocating multiple HSN2 per Srl_no
 hsn_df_copy = hsn_df.copy()
-tax_payable_comm_vec = concord_comm_vec(hsn_df_copy, supply_mat, 'supply')
+tax_payable_comm_vec = concord_comm_vec(hsn_df_copy, supply_mat, 'output tax')
+np.savetxt("tax_payable_comm.csv", tax_payable_comm_vec , delimiter=",")
+# concording input tax credit from HSN2 to Srl_no using supply table for
+# weights for allocating multiple HSN2 per Srl_no
 hsn_df_copy = hsn_df.copy()
-tax_itc_comm_vec = concord_comm_vec(hsn_df_copy, use_mat, 'use')
+tax_itc_comm_vec = concord_comm_vec(hsn_df_copy, supply_mat, 'itc')
+np.savetxt("itc_comm.csv", tax_itc_comm_vec , delimiter=",")
+# concording net tax collection from HSN2 to Srl_no using supply table for
+# weights for allocating multiple HSN2 per Srl_no
+hsn_df_copy = hsn_df.copy()
+tax_cash_comm_vec = concord_comm_vec(hsn_df_copy, supply_mat, 'tax')
+np.savetxt("itc_cash.csv", tax_cash_comm_vec , delimiter=",")
+# allocating tax collection to the industry using supply table for
+# allocating commodity to industry as form one is reported on outward supplies
+tax_cash_ind_vec = concord_ind_vec(tax_cash_comm_vec, allocation_ratio_by_supply_mat)
+tax_cash_df = make_ind_vec_df(tax_cash_ind_vec, industry_header, 'GST Collection Domestic')
+
+# calculating effective tax rate by commodity using actual output value and output tax
 hsn_df_copy = hsn_df.copy()
 etr_comm_vec = concord_comm_vec(hsn_df_copy, supply_mat, 'etr')
-
 np.savetxt("etr.csv", etr_comm_vec , delimiter=",")
 
+# calculating output tax to the industry using supply table for
+# allocating commodity to industry
 tax_payable_ind_vec = concord_ind_vec(tax_payable_comm_vec, allocation_ratio_by_supply_mat)
+# calculating input tax credit to the industry using use table for
+# allocating commodity to industry
 tax_itc_ind_vec = concord_ind_vec(tax_itc_comm_vec, allocation_ratio_by_use_mat)
-tax_cash_ind_vec = tax_payable_ind_vec - tax_itc_ind_vec
+# alternative way to allocate net tax collection to the industry by taking the 
+# difference of output tax and itc
+tax_cash_ind_vec_alt = tax_payable_ind_vec - tax_itc_ind_vec
 make_ind_vec_df(tax_payable_ind_vec, industry_header, 'tax_payable_ind')
 make_ind_vec_df(tax_itc_ind_vec, industry_header, 'tax_itc_ind')
-make_ind_vec_df(tax_cash_ind_vec, industry_header, 'tax_cash_ind')
+make_ind_vec_df(tax_cash_ind_vec_alt, industry_header, 'tax_cash_ind_2')
 
 # call functions to calculate output tax and Input tax credit
 output_tax_mat = calc_output_tax(supply_less_exports_mat, rate_vec)
@@ -522,17 +561,25 @@ itc_available_ind_vec = itc_ind_vec - itc_disallowed_ind_vec
 # Call function to calculate GST on imports
 (GST_on_imports_ind_vec, tot_GST_on_imports) = calc_GST_on_imports(use_mat, import_vec, rate_vec)
 
+
 # Calculate the GST Potential
 gst_potential_less_import_vec = output_tax_ind_vec - itc_available_ind_vec
-gst_potential_less_import_vec_reg = gst_reg_ratio_ind_vec * gst_potential_less_import_vec
-gst_potential_less_import_total = gst_potential_less_import_vec_reg.sum()
-gst_potential_ind_vec = gst_potential_less_import_vec_reg + GST_on_imports_ind_vec
-gst_potential_total = gst_potential_ind_vec.sum()
 
-# Print GST Potential in Rs Crores
-print(f'GST Potential less imports (Rs Cr.): {gst_potential_less_import_total * 1e-2:.2f}')
-print(f'GST Potential on imports (Rs Cr.): {tot_GST_on_imports * 1e-2:.2f}')
-print(f'Total GST Potential (Rs Cr.): {gst_potential_total * 1e-2:.2f}')
+# converting to crores
+GST_on_imports_ind_vec_cr = GST_on_imports_ind_vec/100
+tot_GST_on_imports_cr = tot_GST_on_imports/100
+
+gst_potential_less_import_vec_reg_cr = (gst_reg_ratio_ind_vec * gst_potential_less_import_vec)/100
+gst_potential_less_import_total_cr = gst_potential_less_import_vec_reg_cr.sum()
+gst_potential_ind_vec_cr = gst_potential_less_import_vec_reg_cr + GST_on_imports_ind_vec_cr
+gst_potential_total_cr = gst_potential_ind_vec_cr.sum()
+
+# Calculate the GST Gap for Domestic Taxes - tax cash is in crores
+gst_gap_ind_vec_cr = gst_potential_less_import_vec_reg_cr - tax_cash_ind_vec 
+
+gst_gap_dom_total_cr = gst_gap_ind_vec_cr.sum()
+gst_collection = tax_cash_ind_vec.sum()
+
 
 # Export the importatnt vectors for comparison
 make_mat_df(export_mat, industry_header, "export_ind")
@@ -544,46 +591,48 @@ make_mat_df(exempt_supply_mat, industry_header, "exempt_ind")
 make_mat_df(input_tax_credit_mat, industry_header, "itc_ind")
 make_ind_vec_df(itc_disallowed_ind_vec, industry_header, "itc_disall")
 make_ind_vec_df(GST_on_imports_ind_vec, industry_header, "GST_imports")
-make_ind_vec_df(gst_potential_ind_vec, industry_header, "gst_potential")
+make_ind_vec_df(gst_potential_ind_vec_cr, industry_header, "gst_potential")
+gst_less_import_pot_df = make_ind_vec_df(gst_potential_less_import_vec_reg_cr, industry_header, 'gst_potential_less_imports')
+gst_gap_dom_df = make_ind_vec_df(gst_gap_ind_vec_cr, industry_header, "gst_gap_domestic")
 
 # Grouping industries into broader classes for charts
-industry_group_df = pd.DataFrame(data=industry_group_header, index=industry_header, columns=np.array(['industry_group']))
+industry_group_df = pd.DataFrame(data=industry_group_header, index=industry_header, columns=np.array(['Industry Group']))
 industry_group_df = industry_group_df.reset_index()
 industry_group_df = industry_group_df.rename(columns={'index':'industry_id'})
 industry_group_df.to_csv('Output_csv\industry.csv')
 
-gst_pot_less_import_crores = gst_potential_less_import_vec/100
-gst_pot_ind_crores = gst_potential_ind_vec/100
-gst_pot_crores = gst_pot_ind_crores.reshape(gst_pot_ind_crores.shape[1], 1)
-gst_coll_industry_df = pd.DataFrame(data=gst_pot_crores, index=industry_header, columns=np.array(['GST potential']))
-gst_coll_industry_df = gst_coll_industry_df.reset_index()
-gst_coll_industry_df = gst_coll_industry_df.rename(columns={'index':'industry_id'})
-gst_coll_industry_df.to_csv('Output_csv\gst_coll.csv')
-gst_coll_industry_group_df = pd.merge(gst_coll_industry_df, industry_group_df,
+gst_pot_cr = gst_potential_less_import_vec_reg_cr.reshape(gst_potential_less_import_vec_reg_cr.shape[1], 1)
+gst_pot_ind_df = pd.DataFrame(data=gst_pot_cr, index=industry_header, columns=np.array(['GST Potential']))
+gst_pot_ind_df = gst_pot_ind_df.reset_index()
+gst_pot_ind_df = gst_pot_ind_df.rename(columns={'index':'industry_id'})
+gst_pot_ind_df.to_csv('Output_csv\gst_coll.csv')
+gst_pot_ind_group_df = pd.merge(gst_pot_ind_df, industry_group_df,
                             how="inner", on="industry_id")
-gst_coll_industry_group_df = gst_coll_industry_group_df[['industry_group', 'GST potential']]
-gst_coll_group_df = gst_coll_industry_group_df.groupby(['industry_group']).sum()
-gst_coll_group_df = gst_coll_group_df.reset_index()
+gst_pot_ind_group_df = pd.merge(gst_pot_ind_group_df, tax_cash_df,
+                            how="inner", on="industry_id")
+gst_ind_group_df = gst_pot_ind_group_df.groupby(['Industry Group']).sum()
+gst_ind_group_df = gst_ind_group_df[['GST potential', 'GST Collection Domestic']]
+ 
+gst_ind_group_df = gst_ind_group_df.sort_values('GST potential', ascending=False)
 
-industry_group = gst_coll_group_df['industry_group'].values
-gst_industry_group = gst_coll_group_df['GST potential'].values
-
-
+# Print Results in Rs Crores
+print(f'GST Potential less imports (Rs Cr.): {in_rupees(gst_potential_less_import_total_cr)}')
+print(f'GST Potential on imports (Rs Cr.)  : {in_rupees(tot_GST_on_imports_cr)}')
+print(f'Total GST Potential (Rs Cr.) : {in_rupees(gst_potential_total_cr)}')
+print(f'Total GST Collection (Rs Cr.): {in_rupees(gst_collection)}')
+print(f'Total GST Gap on Domestic Production (Rs Cr.): {in_rupees(gst_gap_dom_total_cr)}')
 
 '''
 Draw charts for displaying outputs
 '''
 plt.rcdefaults()
-fig, ax = plt.subplots(figsize=(8, 8))
+#fig, ax = plt.subplots(figsize=(8, 8))
 # Example data
-x_pos = np.arange(len(industry_group))
-ax.bar(x_pos, gst_industry_group, 
-        color='green')
-ax.set_xticks(x_pos)
-ax.set_xticklabels(industry_group, rotation=90)
-
+ax = gst_ind_group_df.plot.bar(legend=False)
+ax.legend(loc='best')
 ax.set_ylabel('Rupees crores')
 ax.set_xlabel('Industry')
-ax.set_title('GST Potential for India by Industry - 2017')
+ax.set_title('India - GST Potential and Actual Collection by Industry - 2017')
 plt.savefig('GST Potential.png', bbox_inches = "tight")
 plt.show()
+
