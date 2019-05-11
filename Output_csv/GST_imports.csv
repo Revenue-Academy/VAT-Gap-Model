@@ -1,67 +1,67 @@
 ,industry_id,GST_imports
-0,"('Agriculture',)",393662.29250563594
-1,"('Livestock',)",546079.4542469437
-2,"('Forestry and Logging',)",194314.5469079972
-3,"('Fishing & Aquaculture',)",46676.65141626162
-4,"('Coal & Lignite',)",270603.4102179171
-5,"('Crude Petroleum',)",721659.2152834575
-6,"('Natural Gas',)",259693.20140529308
-7,"('Iron Ores',)",220937.2873390905
-8,"('Non ferrous metal ores',)",61693.505979903304
-9,"('Other Mining',)",167703.37095302623
-10,"('Production, processing and preservation of meat, fish, fruit, vegetables, oils and fats',)",232107.06950028663
-11,"('Manufacture of dairy products',)",27272.504116757464
-12,"('Manufacture of grain mill products, etc. and animal feeds',)",456693.39275835676
-13,"('Manufacture of other food products',)",125726.52815250233
-14,"('Manufacture of beverages',)",92370.47709618315
-15,"('Manufacture of tobacco products',)",267255.5764976466
-16,"('Manufacture of textiles + cotton ginning',)",744058.1964631592
-17,"('Manufacture of wearing apparel, except custom tailoring',)",350072.2627200301
-18,"('Manufacture of leather and related products',)",67323.84199909524
-19,"('Manufacture of Basic Iron and Steel + Casting of iron and steel',)",3575332.69510287
-20,"('Manufacture of basic precious and non-ferrous metals + Casting of non-ferrous metals',)",699438.409611934
-21,"('Manufacture of fabricated metal products, except machinery and equipments',)",1275641.3856920735
-22,"('Manufacture of electronic component, consumer electronics, magnetic and optical media',)",549636.2770721223
-23,"('Manufacture of computer and peripheral equipment',)",593700.6982572288
-24,"('Manufacture of communication equipments',)",414315.95468204195
-25,"('Manufacture of optical and electronics products n.e.c',)",186722.81876997274
-26,"('Manufacture of Electrical equipments',)",2313833.644807964
-27,"('Manufacture of machinery and equipments n.e.c',)",4394499.17323699
-28,"('Manufacture of Transport',)",3423429.360303825
-29,"('Manufacture of coke and refined petroleum products',)",1203410.972826336
-30,"(' Manufacture of chemical and chemical products except pharmaceuticals, medicinal and botanical products',)",3756087.0801412985
-31,"('Manufacture of pharmaceutical; medicinal chemicals and botanical products',)",659104.5861462577
-32,"('Manufacture of rubber & plastic products',)",1254908.343524521
-33,"('Manufacture of other non-metallic mineral products',)",424050.0492565105
-34,"('Manufacture of wood and of products of wood and cork, except furniture; manufacture of articles of straw and plaiting material',)",161300.64042432705
-35,"('Manufacture of paper and paper products',)",272002.6168720744
-36,"('Printing and reproduction of recorded media except publishing',)",222127.15714322205
-37,"('Manufacture of furniture',)",175460.73511433916
-38,"('Other Manufacturing',)",2472445.968604155
-39,"('Repair and installation of machinery and equipments',)",67631.0905001559
-40,"('Construction',)",4675862.676734076
-41,"('Electricity',)",1454674.9697651265
-42,"('Gas',)",353707.0134691861
-43,"('Water supply',)",152179.95109335057
-44,"('Railway Transport',)",261495.14658483447
-45,"('Land Transport',)",1189131.7895698736
-46,"('Water Transport',)",277258.01507207076
-47,"('Air Transport',)",373263.7794958435
-48,"('Supportive & Auxilliary transport activities',)",383718.8758222293
-49,"('Storage & warehousing',)",42988.88084716086
-50,"('Communication',)",2050250.8868195936
-51,"('Trade',)",957811.7413093441
-52,"('Hotels & Restaurant',)",345045.5235467297
-53,"('Financial Services',)",681635.6018492829
-54,"('Insurance Services',)",174685.80248690234
-55,"('Ownership of dwellings',)",21087.481391757257
-56,"('Education & Research',)",1034022.0045650487
-57,"('Medical and Health',)",179671.7505185795
-58,"('Legal Services',)",50823.319294690446
-59,"('Computer related services',)",1687000.2237655588
-60,"('Other Business services',)",1028368.4726138838
-61,"('Real estate activities',)",213630.72052461683
-62,"('Renting of machinery and equipment',)",57213.67787658879
-63,"('Community, Social & personal services',)",347975.3154827132
-64,"('Other services',)",833231.6363610968
-65,"('Public admn. & defence',)",1002210.3604784394
+0,Agriculture,55110.53242778987
+1,Livestock,98788.84415302156
+2,Forestry and Logging,199816.05513285924
+3,Fishing & Aquaculture,74316.87014723379
+4,Coal & Lignite,285271.87975690694
+5,Crude Petroleum,726337.8782137493
+6,Natural Gas,260461.4291925082
+7,Iron Ores,222757.04220328078
+8,Non ferrous metal ores,62635.7906301234
+9,Other Mining,173145.49244655666
+10,"Production, processing and preservation of meat, fish, fruit, vegetables, oils and fats",260151.30900739873
+11,Manufacture of dairy products,32593.357223660896
+12,"Manufacture of grain mill products, etc. and animal feeds",457502.4867805205
+13,Manufacture of other food products,376727.29398596816
+14,Manufacture of beverages,98390.39542451601
+15,Manufacture of tobacco products,294890.74325744057
+16,Manufacture of textiles + cotton ginning,752979.569520545
+17,"Manufacture of wearing apparel, except custom tailoring",354467.2421188152
+18,Manufacture of leather and related products,71259.60379929146
+19,Manufacture of Basic Iron and Steel + Casting of iron and steel,3603775.0910085207
+20,Manufacture of basic precious and non-ferrous metals + Casting of non-ferrous metals,706996.6507118832
+21,"Manufacture of fabricated metal products, except machinery and equipments",1293014.4152097034
+22,"Manufacture of electronic component, consumer electronics, magnetic and optical media",555674.925465601
+23,Manufacture of computer and peripheral equipment,600812.7033517679
+24,Manufacture of communication equipments,427210.0618834501
+25,Manufacture of optical and electronics products n.e.c,187957.0059037271
+26,Manufacture of Electrical equipments,2328909.1711064423
+27,Manufacture of machinery and equipments n.e.c,4515734.724089223
+28,Manufacture of Transport,3557541.950705264
+29,Manufacture of coke and refined petroleum products,1217485.2568887935
+30," Manufacture of chemical and chemical products except pharmaceuticals, medicinal and botanical products",3805692.1021561674
+31,Manufacture of pharmaceutical; medicinal chemicals and botanical products,686777.6682375018
+32,Manufacture of rubber & plastic products,1275871.9058431236
+33,Manufacture of other non-metallic mineral products,429631.4668927896
+34,"Manufacture of wood and of products of wood and cork, except furniture; manufacture of articles of straw and plaiting material",163632.6489700403
+35,Manufacture of paper and paper products,278150.1561744319
+36,Printing and reproduction of recorded media except publishing,227788.95662175107
+37,Manufacture of furniture,179507.11476281568
+38,Other Manufacturing,2474337.2145556174
+39,Repair and installation of machinery and equipments,72135.89465885823
+40,Construction,5013408.7582195755
+41,Electricity,1491151.9705660117
+42,Gas,361058.83074287756
+43,Water supply,157001.53400129714
+44,Railway Transport,269241.1132169605
+45,Land Transport,1237495.2903962557
+46,Water Transport,279470.8319732186
+47,Air Transport,492606.5124782342
+48,Supportive & Auxilliary transport activities,399852.3262915967
+49,Storage & warehousing,44464.87141822263
+50,Communication,2112267.7891264968
+51,Trade,1053725.1247754504
+52,Hotels & Restaurant,621521.9829606292
+53,Financial Services,705852.0568902107
+54,Insurance Services,190547.0683167425
+55,Ownership of dwellings,0.0
+56,Education & Research,1073177.0598294635
+57,Medical and Health,187308.89334650905
+58,Legal Services,59844.834638706205
+59,Computer related services,1731688.653365665
+60,Other Business services,1064162.0359568452
+61,Real estate activities,225851.69054544132
+62,Renting of machinery and equipment,59757.36508883711
+63,"Community, Social & personal services",37381.91724615157
+64,Other services,854848.6489772802
+65,Public admn. & defence,0.0
