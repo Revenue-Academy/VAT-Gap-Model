@@ -611,9 +611,9 @@ gst_pot_ind_group_df = pd.merge(gst_pot_ind_df, industry_group_df,
 gst_pot_ind_group_df = pd.merge(gst_pot_ind_group_df, tax_cash_df,
                             how="inner", on="industry_id")
 gst_ind_group_df = gst_pot_ind_group_df.groupby(['Industry Group']).sum()
-gst_ind_group_df = gst_ind_group_df[['GST potential', 'GST Collection Domestic']]
+gst_ind_group_df = gst_ind_group_df[['GST Potential', 'GST Collection Domestic']]
  
-gst_ind_group_df = gst_ind_group_df.sort_values('GST potential', ascending=False)
+gst_ind_group_df = gst_ind_group_df.sort_values('GST Potential', ascending=False)
 
 # Print Results in Rs Crores
 print(f'GST Potential less imports (Rs Cr.): {in_rupees(gst_potential_less_import_total_cr)}')
