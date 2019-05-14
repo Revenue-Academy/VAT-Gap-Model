@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from functions import *
 import matplotlib.pyplot as plt
-from in_rupees import *
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -154,8 +153,8 @@ tax_cash_df = make_ind_vec_df(tax_cash_ind_vec, industry_header, 'GST Collection
 
 # calculating effective tax rate by commodity using actual output value and output tax
 hsn_df_copy = hsn_df.copy()
-etr_comm_vec = concord_comm_vec(hsn_df_copy, supply_mat, 'etr')
-np.savetxt("Output_csv\\etr.csv", etr_comm_vec , delimiter=",")
+etr_vec = concord_comm_vec(hsn_df_copy, supply_mat, 'etr')
+np.savetxt("Output_csv\\etr.csv", etr_vec , delimiter=",")
 
 # calculating output tax to the industry using supply table for
 # allocating commodity to industry
@@ -171,8 +170,10 @@ make_ind_vec_df(tax_itc_ind_vec, industry_header, 'tax_itc_ind')
 make_ind_vec_df(tax_cash_ind_vec_alt, industry_header, 'tax_cash_ind_2')
 
 # call functions to calculate output tax and Input tax credit
-output_tax_mat = calc_output_tax(supply_less_exports_mat, rate_vec)
-input_tax_credit_mat = calc_input_tax_credit(use_for_ITC_mat, rate_vec)
+output_tax_mat = calc_output_tax(supply_less_exports_mat, etr_vec)
+# output_tax_mat = calc_output_tax(supply_less_exports_mat, rate_vec)
+input_tax_credit_mat = calc_input_tax_credit(use_for_ITC_mat, etr_vec)
+# input_tax_credit_mat = calc_input_tax_credit(use_for_ITC_mat, rate_vec)
 output_tax_ind_vec = calc_sum_by_industry(output_tax_mat)
 itc_ind_vec = calc_sum_by_industry(input_tax_credit_mat)
 
@@ -184,7 +185,8 @@ itc_disallowed_ind_vec = calc_itc_disallowed(itc_ind_vec, itc_disallowed_ratio)
 itc_available_ind_vec = itc_ind_vec - itc_disallowed_ind_vec
 
 # Call function to calculate GST on imports
-(GST_on_imports_ind_vec, tot_GST_on_imports) = calc_GST_on_imports(use_mat, import_vec, rate_vec)
+(GST_on_imports_ind_vec, tot_GST_on_imports) = calc_GST_on_imports(use_mat, import_vec, etr_vec)
+# (GST_on_imports_ind_vec, tot_GST_on_imports) = calc_GST_on_imports(use_mat, import_vec, rate_vec)
 
 
 # Calculate the GST Potential
