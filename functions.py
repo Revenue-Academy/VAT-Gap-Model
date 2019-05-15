@@ -1,7 +1,17 @@
 import string
 import pandas as pd
 import numpy as np
+from babel.numbers import format_currency
 
+# Function to convert currency into Rupee format
+def in_rupees(curr):
+    curr_str = format_currency(curr, 'INR', locale='en_IN').replace(u'\xa0', u' ')
+    return(remove_decimal(curr_str))
+
+def remove_decimal(S):
+    S = str(S)
+    S = S[:-3]
+    return S
 
 def col2num(col):
     num = 0
@@ -342,13 +352,9 @@ def concord_comm_vec(hsn_df_copy, alloc_mat, alloc_var):
                                     ('0'+ alloc_hsn2_df['HSN2'].astype(str)))
     hsn_df_copy = pd.merge(hsn_df_copy, alloc_hsn2_df,
                                 how="outer", on="HSN2")
-    #hsn_df.groupby('HSN2')['tax_cash_bu'].mean().sum()
     hsn_df_copy = hsn_df_copy.dropna()
-    #hsn_df.groupby('HSN2')['tax_cash_bu'].mean().sum()
     hsn_df_copy['srl_HSN_wt'] = hsn_df_copy[alloc_var]/hsn_df_copy[alloc_var+'_hsn2']
-    #hsn_df.groupby('HSN2')['tax_cash_bu'].mean().sum()
     hsn_df_copy = hsn_df_copy.sort_values('HSN2')
-    #hsn_df[['srl_no', 'HSN2', 'tax_cash_bu', 'srl_HSN_wt']]
     if alloc_var=='output tax':
         hsn_df_copy['alloc_var_srl_no'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_payable_bu']
     else:
@@ -359,23 +365,25 @@ def concord_comm_vec(hsn_df_copy, alloc_mat, alloc_var):
                 hsn_df_copy['alloc_var_srl_no'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_cash_bu']            
             else:
                 if alloc_var=='etr':
-                    hsn_df_copy['alloc_var_srl_no1'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['taxable_value']
-                    hsn_df_copy['alloc_var_srl_no2'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_cash']
+                    hsn_df_copy['alloc_var_srl_no1'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_cash']
+                    hsn_df_copy['alloc_var_srl_no2'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['taxable_value']
+    hsn_df_copy['srl_no'] = hsn_df_copy['srl_no'].astype(int)
     hsn_df_copy = hsn_df_copy.sort_values('srl_no')
     # grouping by serial number as multiple entries are there
     if alloc_var=='etr':
         srl_no_alloc_var1 = hsn_df_copy.groupby('srl_no')['alloc_var_srl_no1'].sum()
-        srl_no_alloc_var2 = hsn_df_copy.groupby('srl_no')['alloc_var_srl_no2'].sum()       
-        hsn_df_copy['alloc_var_srl_no'] = srl_no_alloc_var1/srl_no_alloc_var2
-    
-    srl_no_alloc_var = hsn_df_copy.groupby('srl_no')['alloc_var_srl_no'].sum()
-    # hsn_df[['srl_no', 'HSN2', 'tax_cash_bu', 'srl_HSN_wt', 'tax_cash_bu_srl_no']]
-    srl_no_alloc_var_df = srl_no_alloc_var.reset_index()
-    srl_no_alloc_var_df['srl_no'] = srl_no_alloc_var_df['srl_no'].astype(int)
-    srl_no_alloc_var_df = srl_no_alloc_var_df.sort_values('srl_no')
-    # srl_no_alloc_var_df.to_csv('srl_no_tax_cash.csv')   
-    srl_no_alloc_var_vec = srl_no_alloc_var_df['alloc_var_srl_no'].values
-    srl_no_alloc_var_vec = srl_no_alloc_var_vec.reshape(srl_no_alloc_var_vec.shape[0], 1)
+        srl_no_alloc_var2 = hsn_df_copy.groupby('srl_no')['alloc_var_srl_no2'].sum()
+        srl_no_alloc_var = np.where(srl_no_alloc_var2==0, 0, srl_no_alloc_var1/srl_no_alloc_var2)
+        srl_no_alloc_var_vec = srl_no_alloc_var.reshape(srl_no_alloc_var.shape[0], 1)
+    else:
+        srl_no_alloc_var = hsn_df_copy.groupby('srl_no')['alloc_var_srl_no'].sum()
+        # hsn_df[['srl_no', 'HSN2', 'tax_cash_bu', 'srl_HSN_wt', 'tax_cash_bu_srl_no']]
+        srl_no_alloc_var_df = srl_no_alloc_var.reset_index()
+        srl_no_alloc_var_df['srl_no'] = srl_no_alloc_var_df['srl_no'].astype(int)
+        srl_no_alloc_var_df = srl_no_alloc_var_df.sort_values('srl_no')
+        # srl_no_alloc_var_df.to_csv('srl_no_tax_cash.csv')   
+        srl_no_alloc_var_vec = srl_no_alloc_var_df['alloc_var_srl_no'].values
+        srl_no_alloc_var_vec = srl_no_alloc_var_vec.reshape(srl_no_alloc_var_vec.shape[0], 1)
     return srl_no_alloc_var_vec
 
 def concord_ind_vec(srl_no_alloc_var_vec, allocation_ratio):
@@ -383,4 +391,3 @@ def concord_ind_vec(srl_no_alloc_var_vec, allocation_ratio):
     # np.savetxt("Output_csv\\alloc_sec.csv", alloc_var_mat , delimiter=",")
     alloc_var_ind_vec = calc_sum_by_industry(alloc_var_mat)
     return alloc_var_ind_vec
-    
