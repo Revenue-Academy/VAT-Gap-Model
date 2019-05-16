@@ -365,7 +365,7 @@ def concord_comm_vec(hsn_df_copy, alloc_mat, alloc_var):
                 hsn_df_copy['alloc_var_srl_no'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_cash_bu']            
             else:
                 if alloc_var=='etr':
-                    hsn_df_copy['alloc_var_srl_no1'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_cash']
+                    hsn_df_copy['alloc_var_srl_no1'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_payable']
                     hsn_df_copy['alloc_var_srl_no2'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['taxable_value']
     hsn_df_copy['srl_no'] = hsn_df_copy['srl_no'].astype(int)
     hsn_df_copy = hsn_df_copy.sort_values('srl_no')
