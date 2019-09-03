@@ -1,6 +1,6 @@
 ,industry_id,exempt_ind
-0,Agriculture,13963193.837650087
-1,Livestock,3573251.7330848807
+0,Agriculture,201297853.34052262
+1,Livestock,74073920.83862975
 2,Forestry and Logging,9261102.805731947
 3,Fishing & Aquaculture,15446322.343880111
 4,Coal & Lignite,0.0
@@ -54,7 +54,7 @@
 52,Hotels & Restaurant,0.0
 53,Financial Services,0.0
 54,Insurance Services,0.0
-55,Ownership of dwellings,0.0
+55,Ownership of dwellings,113205398.55333592
 56,Education & Research,0.0
 57,Medical and Health,0.0
 58,Legal Services,0.0
@@ -64,4 +64,4 @@
 62,Renting of machinery and equipment,0.0
 63,"Community, Social & personal services",0.0
 64,Other services,0.0
-65,Public admn. & defence,0.0
+65,Public admn. & defence,121295839.35253485

@@ -1,6 +1,6 @@
 ,industry_id,dom_supply
-0,Agriculture,16222905.143203566
-1,Livestock,4226703.040105676
+0,Agriculture,224345576.9442975
+1,Livestock,94139733.91092154
 2,Forestry and Logging,23371216.307436276
 3,Fishing & Aquaculture,15446322.343880111
 4,Coal & Lignite,16421336.44227952
@@ -54,7 +54,7 @@
 52,Hotels & Restaurant,49574405.55357631
 53,Financial Services,98966917.45974918
 54,Insurance Services,17554412.41802342
-55,Ownership of dwellings,0.0
+55,Ownership of dwellings,113205398.55333592
 56,Education & Research,66122372.91101419
 57,Medical and Health,34153502.00287142
 58,Legal Services,8454980.082658803
@@ -62,6 +62,6 @@
 60,Other Business services,2549067.3656664835
 61,Real estate activities,23727787.321673095
 62,Renting of machinery and equipment,4630834.222161617
-63,"Community, Social & personal services",3716497.184975963
+63,"Community, Social & personal services",37164971.84975963
 64,Other services,18683195.699787244
-65,Public admn. & defence,0.0
+65,Public admn. & defence,121295839.35253485
