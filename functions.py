@@ -173,7 +173,7 @@ def import_Excel_SUT(filename, sheet_name_sup, sheet_name_use, sheet_name_rates,
     gst_reg_ratio_ind_vec = df_gst_reg_ratio['gst_reg_ratio'].values
     
     return (supply_mat, tax_subsidies_vec, import_vec, trade_margin_vec,
-            industry_header, product_header, use_mat, fin_cons_hh_vec,
+            industry_header, df_product, use_mat, fin_cons_hh_vec,
             fin_cons_gov_vec, gfcf_vec, vlbl_vec, cis_vec, export_vec,
             gst_reg_ratio_ind_vec, industry_group_header, rate_vec, exempt_vec)
 
@@ -198,7 +198,7 @@ def blow_up_mat(supply_mat, use_mat, import_vec, trade_margin_vec, tax_subsidies
             tax_subsidies_vec, export_vec, fin_cons_hh_vec,
             fin_cons_gov_vec, gfcf_vec, vlbl_vec, cis_vec)
 
-# Function to 
+# Function to adjust supplies to taxpayers only to those who are registered
 def adjusted_SUT(gst_reg_ratio_ind_vec, input_mat):
     adj_input_mat = gst_reg_ratio_ind_vec*input_mat
     return adj_input_mat
@@ -274,7 +274,7 @@ def calc_GST_on_imports(use_mat, import_vec, rate_vec):
     tot_GST_on_imports =  GST_on_imports_ind_vec.sum()
     return (GST_on_imports_ind_vec, tot_GST_on_imports)
 
-# Function to export a Vector by industry to a csv file
+# Function to export a vector by industry to a csv file
 def make_ind_vec_df(input_vec, industry_header, output):
     input_vec = input_vec.reshape(input_vec.shape[1], 1)
     ind_df = pd.DataFrame(data=input_vec, index=industry_header, columns=np.array([output]))
@@ -284,20 +284,52 @@ def make_ind_vec_df(input_vec, industry_header, output):
     ind_df.to_csv(file_name)
     return ind_df
 
-# Function to export a matrix to a csv file vy converting it into vector by industry
-def make_mat_df(input_mat, industry_header, output):
+# Function to export a vector by product to a csv file
+def make_comm_vec_df(input_vec, df_product, output):
+    input_vec = input_vec.reshape(input_vec.shape[0], 1)
+    ind_df = pd.DataFrame(data=input_vec, index=df_product['srl_no'], columns=np.array([output]))
+    ind_df = ind_df.reset_index()
+    ind_df = ind_df.rename(columns={'index':'srl_no'})
+    ind_df = pd.merge(df_product, ind_df,
+                            how="inner", on="srl_no")   
+    file_name = "Output_csv\\" + output + ".csv"
+    ind_df.to_csv(file_name, index=False)
+    return ind_df
+
+# Function to export a matrix to a csv file by converting it into vector by industry
+def make_mat_ind_df(input_mat, industry_header, output):
     input_vec = calc_sum_by_industry(input_mat)
     make_ind_vec_df(input_vec, industry_header, output)
 
+# Function to export a matrix to a csv file by converting it into vector by industry
+def make_mat_df(input_mat, df_product, industry_header, output):
+    #input_mat = input_vec.reshape(input_vec.shape[0], 1)
+    ind_df = pd.DataFrame(data=input_mat, index=df_product['srl_no'], columns=np.array(industry_header))
+    ind_df = ind_df.reset_index()
+    #ind_df = ind_df.rename(columns={'index':'srl_no'})
+    ind_df = pd.merge(df_product, ind_df,
+                            how="inner", on="srl_no")   
+    file_name = "Output_csv\\" + output + ".csv"
+    ind_df.to_csv(file_name, index=False)
+    return ind_df
+
+
 # Function to extract the relevant tax data (tax payable, ITC and cash) from GSTR1 & GSTR3     
 def hsn_tax_data(filename, sheet_name_cash_ratio, sheet_name_gstr1, gst_collection_full_year_dom):   
+    # we have data by HSCode of a sample on the output tax and net gst paid (after inout tax credit) 
+    # we use this data to calculate the ratio of net tax paid to output tax
+    # we shall use this data to apply to data from
+    # form gst1 which has only output tax data
+    
+    # calculating the net tax paid ratios   
     tax_cash_df = pd.read_excel(filename, sheet_name_cash_ratio, index_col=False)
     tax_cash_df.fillna(0, inplace=True)
     tax_cash_df['cash_tax_payable_ratio'] = tax_cash_df['tax_cash']/tax_cash_df['tax_payable']
 
     tax_cash_df['HSN2'] = np.where(tax_cash_df['HSN2']>9, tax_cash_df['HSN2'].astype(str),
                                 ('0'+ tax_cash_df['HSN2'].astype(str)))
-    
+
+    # extracting the data from gstr1   
     df_gstr1 = pd.read_excel(filename, sheet_name_gstr1, index_col=False)
     df_gstr1.fillna(0, inplace=True)
     df_gstr1['HSN2'] = np.where(df_gstr1['HSN2']>9, df_gstr1['HSN2'].astype(str),
@@ -306,7 +338,9 @@ def hsn_tax_data(filename, sheet_name_cash_ratio, sheet_name_gstr1, gst_collecti
     # Data is for 8 months now grossedup to one year
     df_gstr1['gstr1_tax_payable'] = df_gstr1['gstr1_tax_payable'] * (12/8)
     tax_cash_df = pd.merge(tax_cash_df, df_gstr1,
-                            how="inner", on="HSN2")    
+                            how="inner", on="HSN2")  
+    # applying the ratios calculated above to calculate the net tax paid
+    # from the putput tax given in gstr1
     tax_cash_df['tax_cash'] = (tax_cash_df['cash_tax_payable_ratio'] * 
                                  tax_cash_df['gstr1_tax_payable'])
     tax_collection_gstr1 = tax_cash_df['tax_cash'].sum()
@@ -317,6 +351,8 @@ def hsn_tax_data(filename, sheet_name_cash_ratio, sheet_name_gstr1, gst_collecti
     tax_cash_df['tax_itc_bu'] = (tax_cash_df['tax_payable_bu'] - 
                                          tax_cash_df['tax_cash_bu'])
     #tax_cash_dom_less_trade = tax_cash_df['tax_cash_bu'].sum()
+    # the dataframe tax_cash explains the complete tax collected
+    # and breaks it down by HS Code
     return tax_cash_df
 
 # Function to get the unique combination for SUT srl_no and HSN-2 digit code
@@ -335,14 +371,21 @@ def hsn_sut_conc(filename, concordance_sheet):
 
 def concord_comm_vec(hsn_df_copy, alloc_mat, alloc_var):
     # concording the srl_no data and allocating to industry
+    # allocation is based on the distribution by srl_no
+    # as per alloc_mat - Supply or Use
+    # we first create a dataframe with the totals of supply by commodity 
+    # i.e. by Srl_no
     alloc_comm_vec = calc_sum_by_commodity(alloc_mat)
     alloc_comm_vec_df = pd.DataFrame(data=alloc_comm_vec, columns=np.array([alloc_var]))
     alloc_comm_vec_df = alloc_comm_vec_df.reset_index()
     alloc_comm_vec_df = alloc_comm_vec_df.rename(columns={'index':'srl_no'})
     alloc_comm_vec_df['srl_no'] = alloc_comm_vec_df['srl_no'] + 1
-    alloc_comm_vec_df['srl_no'] = alloc_comm_vec_df['srl_no'].astype(str)  
+    alloc_comm_vec_df['srl_no'] = alloc_comm_vec_df['srl_no'].astype(str)
+    # we then merge this onto the the srl_no HSN concordance file
+    # to allocate a HSN for each serial number
     hsn_df_copy = pd.merge(hsn_df_copy, alloc_comm_vec_df,
-                                how="outer", on="srl_no")   
+                                how="outer", on="srl_no")
+    # we then group the alloc_var eg. output by HSN 
     alloc_hsn2 = hsn_df_copy.groupby('HSN2')[alloc_var].sum()
     alloc_hsn2 = alloc_hsn2.values
     alloc_hsn2_df = pd.DataFrame(data=alloc_hsn2, columns=np.array([alloc_var+'_hsn2']))
@@ -350,11 +393,20 @@ def concord_comm_vec(hsn_df_copy, alloc_mat, alloc_var):
     alloc_hsn2_df = alloc_hsn2_df.rename(columns={'index':'HSN2'})
     alloc_hsn2_df['HSN2'] = np.where(alloc_hsn2_df['HSN2']>9, alloc_hsn2_df['HSN2'].astype(str),
                                     ('0'+ alloc_hsn2_df['HSN2'].astype(str)))
+    # we merge the alloc_var eg. output by HSN back to the srl_no HSN 
+    # concordance we now have the HSN wise total of alloc_var eg. output
+    # mapped to every srl_no
     hsn_df_copy = pd.merge(hsn_df_copy, alloc_hsn2_df,
                                 how="outer", on="HSN2")
     hsn_df_copy = hsn_df_copy.dropna()
+    # we calculate the weight of each output (alloc_var) by commodity for 
+    # srl_no over the output per commodity by HSN
+    # This gives what proportion of HSN output (alloc_var) is one particular 
+    # srl_no
     hsn_df_copy['srl_HSN_wt'] = hsn_df_copy[alloc_var]/hsn_df_copy[alloc_var+'_hsn2']
     hsn_df_copy = hsn_df_copy.sort_values('HSN2')
+    # we then use these weights to allocate the parameter we are trying to
+    # apportion by srl_no
     if alloc_var=='output tax':
         hsn_df_copy['alloc_var_srl_no'] = hsn_df_copy['srl_HSN_wt'] * hsn_df_copy['tax_payable_bu']
     else:
